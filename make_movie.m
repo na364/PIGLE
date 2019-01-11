@@ -25,7 +25,7 @@ function F = make_movie(params,data,varargin)
 %                                           {view1,view2,..}, were view1 is either "view number' as known in MATLAB,
 %                                           or a vector [angle1 angle2] which defines the view
 %                isf                      - the name of variable to load from the data file
-%                dk_indx                  - indx of dK to plot as the trajectories evolve
+%                dK_indx                  - indx of dK to plot as the trajectories evolve
 %                show_trace               - trace of each particle
 %
 % Output
@@ -42,7 +42,7 @@ prsdArgs.addParameter('enforce_configuration', 0, @isnumeric);
 prsdArgs.addParameter('k_view', {[30 65]}, @iscell);
 %prsdArgs.addParameter('k_view', {2,[-80 10]}, @iscell);
 prsdArgs.addParameter('isf', [], @isnumeric);
-prsdArgs.addParameter('dk_indx', [], @isnumeric);
+prsdArgs.addParameter('dK_indx', [], @isnumeric);
 prsdArgs.addParameter('show_trace', 0, @isnumeric);
 prsdArgs.parse(varargin{:});
 
@@ -53,7 +53,7 @@ rSphere = prsdArgs.Results.rSphere;
 enforce_configuration = prsdArgs.Results.enforce_configuration;
 k_view = prsdArgs.Results.k_view;
 isf = prsdArgs.Results.isf;
-dk_indx = prsdArgs.Results.dk_indx;
+dK_indx = prsdArgs.Results.dK_indx;
 show_trace = prsdArgs.Results.show_trace;
 
 %% Calculate number of frames (=loops), the step size between frames, and reduce r_supercell to speed up
@@ -74,7 +74,8 @@ clear F h1
 h=figure;
 
 %% Create configuration
-if ~isfield(data.prtcl,'r_conf') || enforce_configuration
+if ~isfield(data.prtcl,'conf') || ...
+       ~isfield(data.prtcl(1).conf,'r_conf') || enforce_configuration
     disp('Enforcing configuration')
     caseNum =1; r0=1; Natoms = 8;
     for i=1:length(data.prtcl)
@@ -134,13 +135,13 @@ end
 
 %% Create background image - ISF
 if ~isempty(isf)
-    if isempty(dk_indx), dk_indx = 1:size(isf,1); end
+    if isempty(dK_indx), dK_indx = 1:size(isf,1); end
     subp_h(length(k_view)+1) = subplot(length(k_view),2,length(k_view)+1,'FontSize', 18);
     hold on
     lgnd = {};
-    for i=1:length(dk_indx)
+    for i=1:length(dK_indx)
         h2(i) = plot(params.t(1),isf(i,1),lineStyle{i},'LineWidth',2);
-        lgnd = {lgnd{:},['\Delta K = ' num2str(norm(params.dk(dk_indx(i))))]};
+        lgnd = {lgnd{:},['\Delta K = ' num2str(norm(params.dK(dK_indx(i))))]};
     end
     axis([params.t_isf(1) params.t_isf(end) -0.1 1])
     title('ISF');
@@ -160,7 +161,7 @@ z=z*rSphere;
 % Plot the particles (either as points of spheres)
 for i=1:length(data.prtcl)
     Nprtcl = length(data.prtcl(i).r_supercell(1,:,1));
-    r_conf1 = hlp_f.calc_new_r(data.prtcl(i).r_supercell(:,:,1),data.prtcl(i).r_conf,params.z_enabled,params.theta_enabled);
+    r_conf1 = hlp_f.calc_new_r(data.prtcl(i).r_supercell(:,:,1),data.prtcl(i).conf.r_conf,params.z_enabled,params.theta_enabled);
     if ~params.z_enabled, r_conf1 = [r_conf1;zeros(1,size(r_conf1,2))]; end
     r_conf1(3,:) = r_conf1(3,:) + 3;
     if ~params.z_enabled, r_conf1(3,:) = r_conf1(3,:) + fPES(r_conf1(1,:),r_conf1(2,:)); end
@@ -232,7 +233,7 @@ for l = 1:loops
     
     for i=1:length(data.prtcl)
         Nprtcl = length(data.prtcl(i).r_supercell(1,:,1));
-        r_conf1 = hlp_f.calc_new_r(data.prtcl(i).r_supercell(:,:,l*steps),data.prtcl(i).r_conf,params.z_enabled,params.theta_enabled);
+        r_conf1 = hlp_f.calc_new_r(data.prtcl(i).r_supercell(:,:,l*steps),data.prtcl(i).conf.r_conf,params.z_enabled,params.theta_enabled);
         if ~params.z_enabled, r_conf1 = [r_conf1;zeros(1,size(r_conf1,2))]; end
         r_conf1(3,:) = r_conf1(3,:) + 3;
         if ~params.z_enabled, r_conf1(3,:) = r_conf1(3,:) + fPES(r_conf1(1,:),r_conf1(2,:)); end
@@ -257,9 +258,9 @@ for l = 1:loops
     
     %% Create background image - ISF
     if ~isempty(isf)
-        for i=1:length(dk_indx)
+        for i=1:length(dK_indx)
             h2(i).XData = params.t_isf(1:l*steps);
-            h2(i).YData = isf(dk_indx(i),1:l*steps);
+            h2(i).YData = isf(dK_indx(i),1:l*steps);
         end
     end
     

@@ -76,9 +76,25 @@ end
 % of particles. Later on, after the simmulation had completed, the ISF will
 % be calculated using these configurations.
 
-[r_conf(1:Nmass).caseNum] = deal(r_conf_case_num);
-[r_conf(1:Nmass).r0] = deal(r_conf_radius);
-[r_conf(1:Nmass).Natoms] = deal(r_conf_Natoms);
+[r_conf(1:Nmass).caseNum]                         = deal(r_conf_case_num{:});
+[r_conf(1:Nmass).r0]                              = deal(r_conf_radius{:});
+[r_conf(1:Nmass).Natoms]                          = deal(r_conf_Natoms{:});
+[CoM_form_factor_conf(1:Nmass).caseNum]           = deal(CoM_form_factor_case_num{:}); % The configuration case refer to form_factor.m.
+[CoM_form_factor_conf(1:Nmass).hemisphere_radius] = deal(CoM_form_factor_hemisphere_radius{:});
+[form_factor_conf(1:Nmass).caseNum]               = deal(form_factor_case_num{:}); % The configuration case refer to form_factor.m.
+[form_factor_conf(1:Nmass).hemisphere_radius]     = deal(form_factor_hemisphere_radius{:});
+
+% TODO remove this awful cod ing practice and in general, transfer all the particle handling to
+% proper OOP
+for i=1:Nmass
+    for j=1:length(form_factor_conf(i).caseNum)
+        scatCntr(j).caseNum = form_factor_conf(i).caseNum(j);
+        scatCntr(j).hemisphere_radius = form_factor_conf(i).hemisphere_radius(j);
+    end
+    form_factor_conf(i).scatCntr = scatCntr;
+end
+form_factor_conf = rmfield(form_factor_conf,'caseNum');
+form_factor_conf = rmfield(form_factor_conf,'hemisphere_radius');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Translational Friction %

@@ -73,7 +73,6 @@ for i=1:length(params.mass_list)
     params.prtcl(i).momenta_dimension_theta = length(params.prtcl(i).A_theta);
     params.prtcl(i).B = calculate_B(params.prtcl(i).A, params.prtcl(i).mass, params.k_B, params.T);
     params.prtcl(i).B_theta = calculate_B(params.prtcl(i).A_theta, params.prtcl(i).angular_mass, params.k_B, params.T);
-    params.prtcl(i).r_conf = prepare_configuration(r_conf(i));
 end
 
 %% Set defaults for data output (output everything).

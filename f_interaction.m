@@ -20,8 +20,9 @@ switch f_func
         f = zeros(size(x));
         for i=1:2:length(f_func_params)
             A = f_func_params(i);
+            if A > 0, warning('the interadsorbate force is positive'); end
             pwr = f_func_params(i+1);
-            f = f + -A*(x.^(-pwr));
+            f = f + A*(x.^(-pwr));
         end
         
     case 2

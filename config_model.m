@@ -27,16 +27,22 @@ params.interactions.active = interactions_active;
 params.N_runs = N_runs;
 params.run_parallel = run_parallel;
 
-% Specify dk as a 2D vector, 3rd dim is azimuths.
-params.dk(:,:,1) = azim_1.*dk';
-params.dk(:,:,2) = azim_2.*dk';
-
 % Specify simulation time parameters
 % (those will be adjusted by the program, see below if interested)
 params.sample_time = sample_time;
 params.isf_sample_time = isf_sample_time;
 params.thermalizing_time = thermalizing_time;
 params.stop_time = stop_time;
+
+%% Parameters for scattering calculations
+
+% Specify dK as a 2D vector, 3rd dim is azimuths.
+params.dK(:,:,1) = azim_1.*dK';
+params.dK(:,:,2) = azim_2.*dK';
+
+% beam props and total scattering angle
+params.beam_ki                = beam_ki;
+params.theta_tot                = theta_tot;
 
 %% Config dimentions and parallelization
 
@@ -91,16 +97,21 @@ params = calculate_sim_params(params, A_strct, A_theta_strct, r_conf);
 %% Apply In-Phase Scattering Condition
 % If interactions are enabled:
 % phase from shadow scatterers (outside of unitcell) must be equal
-% exp(-i*((R+a)*dk)) = exp(-i*((R)*dk)) ==> 2*pi*n = dk*a where a is of the
+% exp(-i*((R+a)*dK)) = exp(-i*((R)*dK)) ==> 2*pi*n = dK*a where a is of the
 % supercell
 if params.interactions.active
     disp('#############################################')
     disp('# dK is changed to comply with interactions #')
     disp('#############################################')
     G_supercell = 2*pi./params.supercell.celldim(1:2);
-    for i=1:size(params.dk,3)
-        params.dk(:,:,i) = G_supercell.*round(params.dk(:,:,i)./G_supercell);
+    for i=1:size(params.dK,3)
+        params.dK(:,:,i) = G_supercell.*round(params.dK(:,:,i)./G_supercell);
     end
+end
+
+% Calculate particle configuration (inc. form factors)
+for i=1:length(params.prtcl)
+    params.prtcl(i).conf = prepare_configuration(r_conf(i),'CoM_form_factor_conf',CoM_form_factor_conf(i),'form_factor_conf',form_factor_conf(i),'dK',params.dK,'beam_ki',params.beam_ki,'theta_tot',params.theta_tot);
 end
 
 %% Calculate initial conditions:

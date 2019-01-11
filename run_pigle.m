@@ -65,7 +65,9 @@ create_model
 if isISF
     % Calcualate the average ISF of N runs trajectories
     tic;
-    [data, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = calculate_average_isf(params.N_runs, params, params.dk);
+    [data, isf_c_CoM, isf_inc_CoM, isf_1_CoM, isf_c, isf_inc, isf_1, ...
+     max_isf_c_CoM, max_isf_inc_CoM, max_isf_1_CoM, max_isf_c, max_isf_inc, max_isf_1] ...
+     = calculate_average_isf(params.N_runs, params, params.dK);
     toc;
     
     params.t_isf = params.t(1:size(isf_c_CoM,2));    
@@ -113,24 +115,24 @@ if isSave
     
     if isISF
         if sum(ISF2save == 1)
-            save(data_file,'isf_inc_CoM','isf_inc','-append');
+            save(data_file,'isf_inc_CoM','isf_inc','max_isf_inc_CoM','max_isf_inc','-append');
         end
         
         if sum(ISF2save == 2)
-            save(data_file,'isf_c_CoM','isf_c','-append');
+            save(data_file,'isf_c_CoM','isf_c','max_isf_c_CoM','max_isf_c','-append');
         end
         
         if sum(ISF2save == 3)
-            save(data_file,'isf_1_CoM','isf_1','-append');
+            save(data_file,'isf_1_CoM','isf_1','max_isf_1_CoM','max_isf_1','-append');
         end
     end
 end
 
 if toPlot && isISF
     % Plot the data:
-    figure; for i=1:size(dk,2), plot(params.t_isf',real(isf_c(i,:,1))); hold on; end
+    figure; for i=1:size(dK,2), plot(params.t_isf',real(isf_c(i,:,1))); hold on; end
     xlabel('t / ps'); ylabel('Normalised ISF'); title('Coherent ISF, 1st azimuth')
-    figure; for i=1:size(dk,2), plot(params.t_isf',real(isf_inc(i,:,1))); hold on; end
+    figure; for i=1:size(dK,2), plot(params.t_isf',real(isf_inc(i,:,1))); hold on; end
     xlabel('t / ps'); ylabel('Normalised ISF'); title('Incoherent ISF, 1st azimuth')
 end
 

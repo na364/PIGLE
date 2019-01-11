@@ -8,24 +8,17 @@
 % Calculate ISFs for multiple runs (same parameters, different random seeds).
 % Return the average ISF. The purpose of this is to remove noisy parts.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [data_last, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = calculate_average_isf(N, params, dk)
+function [data_last, isf_c_CoM,     isf_inc_CoM,     isf_1_CoM,     isf_c,     isf_inc,     isf_1, ...
+                 max_isf_c_CoM, max_isf_inc_CoM, max_isf_1_CoM, max_isf_c, max_isf_inc, max_isf_1] = calculate_average_isf(N, params, dK)
 
     % Reshape dK to matrix of (:,2)
-    dk_reshaped = reshape(permute(dk,[1 3 2]),[],2);    
+    dK_reshaped = reshape(permute(dK,[1 3 2]),[],2);    
 
     % Run N simulations and sum the FFTs of the scattering functions.
-    [data_last, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_isf(N, params, dk_reshaped);
+    [data_last, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_isf(N, params, dK_reshaped);
     
-    % Normalise the ISF to unity.
-    isf_c_CoM = normalise(isf_c_CoM);
-    isf_inc_CoM = normalise(isf_inc_CoM);
-    isf_1_CoM = normalise(isf_1_CoM);
-    isf_c = normalise(isf_c);
-    isf_inc = normalise(isf_inc);
-    isf_1 = normalise(isf_1);
-
-    % Reshape isf to matrix with dimention (dk,length(isf),num_of_azimuth)
-    if size(dk,3) > 1
+        % Reshape isf to matrix with dimention (dK,length(isf),num_of_azimuth)
+    if size(dK,3) > 1
         isf_c_CoM = permute(reshape(isf_c_CoM,[],2,size(isf_c_CoM,2)),[1 3 2]);
         isf_inc_CoM = permute(reshape(isf_inc_CoM,[],2,size(isf_inc_CoM,2)),[1 3 2]);
         isf_1_CoM = permute(reshape(isf_1_CoM,[],2,size(isf_1_CoM,2)),[1 3 2]);
@@ -34,9 +27,17 @@ function [data_last, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = 
         isf_1 = permute(reshape(isf_1,[],2,size(isf_1,2)),[1 3 2]);
     end
     
+    % Normalise the ISF to unity.
+    [isf_c_CoM, max_isf_c_CoM] = normalise(isf_c_CoM);
+    [isf_inc_CoM, max_isf_inc_CoM] = normalise(isf_inc_CoM);
+    [isf_1_CoM, max_isf_1_CoM] = normalise(isf_1_CoM);
+    [isf_c, max_isf_c] = normalise(isf_c);
+    [isf_inc, max_isf_inc] = normalise(isf_inc);
+    [isf_1, max_isf_1] = normalise(isf_1);
+    
 end
 
-function [data, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_isf(N, params, dk)
+function [data, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_isf(N, params, dK)
     % Sum the FFTs of the scattering functions of N simulations.
 
     z_enabled = params.z_enabled;
@@ -64,17 +65,17 @@ function [data, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_i
         data = sim_position(params,n_parall_runs);
         numOfActualSim = numOfActualSim + length(data);
         
-        % Attach r_conf to 'data' struct, which is used in the parfor.
+        % Attach conf to 'data' struct, which is used in the parfor.
         for j=1:length(data)
             for k=1:length(data(j).prtcl)
-                data(j).prtcl(k).r_conf = params.prtcl(k).r_conf;
+                data(j).prtcl(k).conf = params.prtcl(k).conf;
             end
         end
         
-        % Calculate the scattered amplitudes for our value of dk.
+        % Calculate the scattered amplitudes for our value of dK.
         if length(data) > 1
             parfor j=1:length(data)
-                [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(dk, data(j),z_enabled,dKz_include_in_isf,theta_enabled);
+                [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(dK, data(j),z_enabled,dKz_include_in_isf,theta_enabled);
 
                 % Add to the running total Skw.
                 sum_Skw_c_CoM = sum_Skw_c_CoM + Skw_c_CoM;
@@ -85,7 +86,7 @@ function [data, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_i
                 sum_Skw_1 = sum_Skw_1 + Skw_1;
             end
         else % reduce the overhead of parfor for one itteration
-            [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(dk, data, z_enabled,dKz_include_in_isf,theta_enabled);
+            [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(dK, data, z_enabled,dKz_include_in_isf,theta_enabled);
             
             % Add to the running total Skw.
             sum_Skw_c_CoM = sum_Skw_c_CoM + Skw_c_CoM;
@@ -158,11 +159,15 @@ elseif size(delta_k,2) == 3
 end    
 
 for j=1:length(data.prtcl)
-    r = data.prtcl(j).r;
+    r = data.prtcl(j).r;    
+    FF_CoM = data.prtcl(j).conf.form_factor.FF_CoM;
+    
+    % Reshape F_CoM to a vector compatible with the reshaped dK
+    FF_CoM = reshape(FF_CoM,[],1);    
     
     for i=1:size(r,2)
         r_i = squeeze(r(1:(2 + (z_enabled > 0 && dKz_include_in_isf)),i,:));
-        A_i = exp(1i * (delta_k * r_i));
+        A_i = FF_CoM .* exp(1i * (delta_k * r_i));
         A_c_CoM = A_c_CoM + A_i;
         Skw_1_CoM = conj(fft(A_i,[],2)).*fft(A_i,[],2);
         Skw_inc_CoM = Skw_inc_CoM + Skw_1_CoM;
@@ -180,7 +185,7 @@ Skw_c_CoM = conj(fft(A_c_CoM,[],2)).*fft(A_c_CoM,[],2);
 % is there any particle which is not a point particle?
 not_a_point=0;
 for j=1:length(data.prtcl)
-    if size(data.prtcl(j).r_conf,1) > 1
+    if size(data.prtcl(j).conf.r_conf,1) > 1
         not_a_point=1;
     end
 end
@@ -194,12 +199,21 @@ else
 
     for j=1:length(data.prtcl)
         r = data.prtcl(j).r;
-        r_conf = data.prtcl(j).r_conf;
+        r_conf = data.prtcl(j).conf.r_conf;
         r1 = hlp_f.calc_new_r(r,r_conf,z_enabled,theta_enabled);
+        
+        % Prep FF for the calculation.
+        % TODO check if it works for Natoms>1 etc.
+        FF_tmp = data.prtcl(j).conf.form_factor.FF;
+        % Reshape F_tmp to a vector compatible with the reshaped dK
+        FF_tmp = reshape(FF_tmp,[],size(FF_tmp,2));
+        % Duplicate the FF_tmp to match r1 (with length of num of scattering centers * num of
+        % CoM trajectories)
+        FF = repmat(FF_tmp,1,size(r,2));
 
         for i=1:size(r1,2)
             r_i = squeeze(r1(1:(2 + (z_enabled > 0 && dKz_include_in_isf)),i,:));
-            A_i = exp(1i * (delta_k * r_i));
+            A_i = FF(:,i) .* exp(1i * (delta_k * r_i));
             A_c = A_c + A_i;
             Skw_1 = conj(fft(A_i,[],2)).*fft(A_i,[],2);
             Skw_inc = Skw_inc + Skw_1;
@@ -215,10 +229,9 @@ end
 
 end
 
-function I = normalise(I)
+function [I,maxI] = normalise(I)
 % Normalise the ISF to unity
-maxI=max(I');
-maxImat=repmat(maxI',1,length(I));
-I=I./maxImat;
+maxI=max(I,[],2);
+I=I./maxI;
 end
 
