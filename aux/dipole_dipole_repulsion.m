@@ -67,7 +67,7 @@ classdef dipole_dipole_repulsion
                 r=1;
             end
             
-            f_const_debye = -6*mu^2; % [Debye^2]
+            f_const_debye = 6*mu^2; % [Debye^2]
             
             coulomb_const = dipole_dipole_repulsion.coulomb_const; %[(V * Angstrm^2) / Debye]
             
