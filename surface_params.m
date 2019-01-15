@@ -223,6 +223,6 @@ params.interactions.x = x_interactions; % in Angstrom
 
 for i=1:length(params.interactions.f_func)
     % force is in meV/Angstrm
-    params.interactions.Fint(i,:) = ...
+    params.interactions.Fint(:,i) = ...
         f_interaction(params.interactions.x,params.interactions.f_func(i),params.interactions.f_func_params{i})*k1;
 end
