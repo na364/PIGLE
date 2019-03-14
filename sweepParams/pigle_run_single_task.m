@@ -17,3 +17,4 @@ prep_environment
 cd(sub_job_path)
 run('run_pigle.m')
 
+disp('done pigle')

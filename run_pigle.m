@@ -128,6 +128,8 @@ if isSave
     end
 end
 
+disp('PIGLE: save done')
+
 if toPlot && isISF
     % Plot the data:
     figure; for i=1:size(dK,2), plot(params.t_isf',real(isf_c(i,:,1))); hold on; end
