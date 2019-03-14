@@ -32,21 +32,23 @@ end
 % seed_values_1 = seed_values_master(1,1).val;
 % seed_values_2 = seed_values_master(1,2).val;
 % seed_values_3 = seed_values_master(1,3).val;
-% 
+
 % theta_seed_values_1 = theta_seed_values_master(1,1).val;
 % theta_seed_values_2 = theta_seed_values_master(1,2).val;
 % theta_seed_values_3 = theta_seed_values_master(1,3).val;
-% 
+
 % assignin('base','seed_values_1',seed_values_1)
 % assignin('base','seed_values_2',seed_values_2)
 % assignin('base','seed_values_3',seed_values_3)
-% 
+
 % assignin('base','theta_seed_values_1',theta_seed_values_1)
 % assignin('base','theta_seed_values_2',theta_seed_values_2)
 % assignin('base','theta_seed_values_3',theta_seed_values_3)
 
-% save('pigle_data.mat', 'params','seed_values_1','seed_values_2','seed_values_3', ...
-%     'theta_seed_values_1','theta_seed_values_2','theta_seed_values_3');
+% save('pigle_data.mat', 'params','seed_values_1','theta_seed_values_1','-append');
+% save('pigle_data.mat', 'params','seed_values_2','theta_seed_values_2','-append');
+% save('pigle_data.mat', 'params','seed_values_3','theta_seed_values_3','-append');
+
 % clear seed_values_1 seed_values_2 seed_values_3  ...
 %     theta_seed_values_1 theta_seed_values_2 theta_seed_values_3;
 
