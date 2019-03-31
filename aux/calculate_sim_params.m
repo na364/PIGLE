@@ -31,7 +31,7 @@ end
  
 params.supercell.celldim = params.unitcell.celldim(1:2) .* superCellDim;
 if params.interactions.out_cutoff_r > min(params.supercell.celldim) && params.interactions.active
-    error('out_cutoff_r > params.supercell.celldim. Reduce out_cutoff_r or number_density, or, increase Nprtcl')
+    warning('out_cutoff_r > params.supercell.celldim. Reduce out_cutoff_r or number_density, or, increase Nprtcl.')
 end
 
 if params.model_dim > 2

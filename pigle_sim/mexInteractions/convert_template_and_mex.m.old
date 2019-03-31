@@ -1,0 +1,46 @@
+
+tmpPath = pwd;
+global pigle_path
+cd([pigle_path '/pigle_sim/mexInteractions/']);
+
+nop=sum([params.prtcl(:).Nprtcl]);
+nopStr = num2str(nop);
+model_dim_Str = num2str(params.model_dim);
+
+fTbltdDim1 = size(params.interactions.Fint,1);
+fTbltdDim1Str = num2str(fTbltdDim1);
+
+fTbltdDim2 = size(params.interactions.Fint,2);
+fTbltdDim2Str = num2str(fTbltdDim2);
+
+rep_strings('frmBuilder_sfun_intrAdsrbtFrcs_template.c', 'frmBuilder_sfun_intrAdsrbtFrcs.c',nopStr,model_dim_Str,fTbltdDim1Str,fTbltdDim2Str);
+rep_strings('frmBuilder_sfun_intrAdsrbtFrcs_template_wrapper.c', 'frmBuilder_sfun_intrAdsrbtFrcs_wrapper.c',nopStr,model_dim_Str,fTbltdDim1Str,fTbltdDim2Str);
+rep_strings('frmBuilder_sfun_intrAdsrbtFrcs_template.tlc', 'frmBuilder_sfun_intrAdsrbtFrcs.tlc',nopStr,model_dim_Str,fTbltdDim1Str,fTbltdDim2Str);
+
+mex frmBuilder_sfun_intrAdsrbtFrcs.c frmBuilder_sfun_intrAdsrbtFrcs_wrapper.c interp1lin.c intrAdsrbtFrcs.c
+
+rep_strings('frmBuilder_sfun_setclist_template.c', 'frmBuilder_sfun_setclist.c',nopStr,model_dim_Str,fTbltdDim1Str,fTbltdDim2Str);
+rep_strings('frmBuilder_sfun_setclist_template_wrapper.c', 'frmBuilder_sfun_setclist_wrapper.c',nopStr,model_dim_Str,fTbltdDim1Str,fTbltdDim2Str);
+rep_strings('frmBuilder_sfun_setclist_template.tlc', 'frmBuilder_sfun_setclist.tlc',nopStr,model_dim_Str,fTbltdDim1Str,fTbltdDim2Str);
+
+mex frmBuilder_sfun_setclist.c frmBuilder_sfun_setclist_wrapper.c setclist.c
+
+cd(tmpPath);
+
+function rep_strings(fname1,fname2,nopStr,model_dim_Str,fTbltdDim1Str,fTbltdDim2Str)
+
+fid  = fopen(fname1,'r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = regexprep(f,'44',nopStr);
+f = regexprep(f,'22',model_dim_Str);
+f = regexprep(f,'33',fTbltdDim2Str);
+f = regexprep(f,'500',fTbltdDim1Str);
+f = regexprep(f,'_template','');
+
+
+fid  = fopen(fname2,'w');
+fprintf(fid,'%s',f);
+fclose(fid);
+
+end

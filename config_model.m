@@ -30,6 +30,9 @@ params.run_parallel = run_parallel;
 % Specify simulation time parameters
 % (those will be adjusted by the program, see below if interested)
 params.sample_time = sample_time;
+params.sample_time_clist = sample_time_clist;
+params.nclist            = floor(sample_time_clist/sample_time);
+if params.nclist < 1, error('sample_time > sample_time_clist, can not proceed'); end
 params.isf_sample_time = isf_sample_time;
 params.thermalizing_time = thermalizing_time;
 params.stop_time = stop_time;

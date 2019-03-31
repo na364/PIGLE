@@ -233,3 +233,6 @@ end
 save_system('sl_pigle_main_current','sl_pigle_main_current')
 close_system('sl_pigle_main_current',0); close_system('sl_pigle_Population',0)
 
+addpath([pigle_path '/pigle_sim/mexInteractions/']);
+convert_template_and_mex
+

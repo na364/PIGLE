@@ -1,13 +1,13 @@
 
 %% params for surface_params.m
 T=300;
-Nprtcl_total = 50;
-mass_list = [300 300];
+Nprtcl_total = 40;
+mass_list = [50 50];
 radius = 1;
-number_density = [0.001 0.004];
-eta = 6 ; eta2 = 6;
-eta_theta = 4; eta_theta2 = 1;
-tau = [1 5];
+number_density = [0.05 0.05];
+eta = 2 ; eta2 = 2;
+eta_theta = 1; eta_theta2 = 1;
+tau = [1 1];
 
 %a1=3.6147/sqrt(2);                          % Copper 111 lattice constant in Angstrom
 a1=2.71;                          % Ru 0001 lattice constant in Angstrom
@@ -103,8 +103,8 @@ f_func_params = {[fparam1 4],[fparam2 4],[fparam3 4]};
 % out_cutoff_r - The supercell must be larger than that number (see calculate_sim_params.m).
 %                TODO: include in connection lists, once implemented
 % in_cutoff_r -  the force between particles will be calculated for r >= r_in
-out_cutoff_r = norm(unitcell.celldim)*1;
-in_cutoff_r = 0.1;
+out_cutoff_r = norm(unitcell.celldim)*100;
+in_cutoff_r = 0.01;
 
 % x_interactions - the points in which the force is to be calculated
 x_min = in_cutoff_r/10; % in Angstrom
