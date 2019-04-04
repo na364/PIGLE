@@ -1,7 +1,12 @@
 
-tmpPath = pwd;
-global pigle_path
-cd([pigle_path '/pigle_sim/mexInteractions/']);
+% This script copies the source files from [src_path], and compiles it at
+% the current working directory, while setting the dimensions of several
+% in/out ports of the 'intrAdsrbtFrcs' and 'setclist' S-functions.
+
+ currPath = pwd;
+ global pigle_path
+ src_path = [pigle_path '/pigle_sim/mexInteractions/'];
+ %cd(src_path);
 
 nop=sum([params.prtcl(:).Nprtcl]);
 nopStr = num2str(nop);
@@ -29,7 +34,7 @@ changeCellArr(8,:)  = {'clisti'  ,nopStr       ,'1'};
 changeCellArr(9,:)  = {'clist'   ,nopStr       ,nopStr};
 changeCellArr(10,:) = {'iaf'     ,model_dim_Str,nopStr};
 
-rep_strings([fname '.c'],changeCellArr);
+rep_strings([fname '.c'],changeCellArr,src_path);
 
 %% frmBuilder_sfun_intrAdsrbtFrcs_wrapper
 fname = 'frmBuilder_sfun_intrAdsrbtFrcs_wrapper';
@@ -40,7 +45,7 @@ changeCellArr(2,:)  = {'#define','y_width',nopStr};
 changeCellArr(3,:)  = {'int_T','posDims[2]',[' = {' model_dim_Str ',' nopStr '};']};
 changeCellArr(4,:)  = {'int_T','fTbltdDims[2]',[' = {' fTbltdDim1Str ',' fTbltdDim2Str '};']};
 
-rep_strings1([fname '.c'],changeCellArr);
+rep_strings1([fname '.c'],changeCellArr,src_path);
 
 %% frmBuilder_sfun_setclist
 
@@ -51,7 +56,7 @@ changeCellArr(1,:) = {'pos',model_dim_Str,nopStr};
 changeCellArr(2,:) = {'clisti',nopStr,'1'};
 changeCellArr(3,:) = {'clist',nopStr,nopStr};
 
-rep_strings([fname '.c'],changeCellArr);
+rep_strings([fname '.c'],changeCellArr,src_path);
 
 %% frmBuilder_sfun_setclist_wrapper
 fname = 'frmBuilder_sfun_setclist_wrapper';
@@ -60,19 +65,26 @@ clear changeCellArr
 changeCellArr(1,:)  = {'#define','u_width',model_dim_Str};
 changeCellArr(2,:)  = {'int_T','posDims[2]',[' = {' model_dim_Str ',' nopStr '};']};
 
-rep_strings1([fname '.c'],changeCellArr);
+rep_strings1([fname '.c'],changeCellArr,src_path);
 
 %%
+copyfile([src_path 'frmBuilder_sfun_intrAdsrbtFrcs.tlc'],[currPath '/']);
+copyfile([src_path 'intrAdsrbtFrcs.c'],[currPath '/']);
+copyfile([src_path 'intrAdsrbtFrcs.h'],[currPath '/']);
+copyfile([src_path 'interp1lin.c'],[currPath '/']);
+copyfile([src_path 'interp1lin.h'],[currPath '/']);
+mex('frmBuilder_sfun_intrAdsrbtFrcs.c','frmBuilder_sfun_intrAdsrbtFrcs_wrapper.c',[src_path 'interp1lin.c'],[src_path 'intrAdsrbtFrcs.c']);
 
-mex frmBuilder_sfun_intrAdsrbtFrcs.c frmBuilder_sfun_intrAdsrbtFrcs_wrapper.c interp1lin.c intrAdsrbtFrcs.c
+copyfile([src_path 'frmBuilder_sfun_setclist.tlc'],[currPath '/']);
+copyfile([src_path 'setclist.c'],[currPath '/']);
+copyfile([src_path 'setclist.h'],[currPath '/']);
+mex('frmBuilder_sfun_setclist.c','frmBuilder_sfun_setclist_wrapper.c',[src_path 'setclist.c']);
 
-mex frmBuilder_sfun_setclist.c frmBuilder_sfun_setclist_wrapper.c setclist.c
+%cd(currPath);
 
-cd(tmpPath);
+function rep_strings(fname,changeCellArr,src_path)
 
-function rep_strings(fname,changeCellArr)
-
-fid = fopen(fname);
+fid = fopen([src_path fname]);
 lines = textscan(fid,'%s','delimiter','\n');
 fclose(fid);
 lines = lines{1};
@@ -105,9 +117,9 @@ fclose(fid);
 
 end
 
-function rep_strings1(fname,changeCellArr)
+function rep_strings1(fname,changeCellArr,src_path)
 
-fid = fopen(fname);
+fid = fopen([src_path fname]);
 lines = textscan(fid,'%s','delimiter','\n');
 fclose(fid);
 lines = lines{1};
