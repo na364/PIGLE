@@ -61,17 +61,37 @@ classdef prepFuncs
             % particle, with the exception that the potision in 'z' dimension, if
             % enabled, is set to be at the min of the potential.
             
+            % Prepare an r_init of evenly spreaded the particles
+            Nprtcl = sum([params.prtcl.Nprtcl]);
+            celldim = params.supercell.celldim;
+            
+            rx = linspace(0,celldim(1)*0.9,ceil(sqrt(Nprtcl*1.5)));
+            ry = linspace(0,celldim(2)*0.9,ceil(sqrt(Nprtcl*1.5)));
+            [RX,RY] = meshgrid(rx,ry);
+            rx = RX(:);
+            ry = RY(:);
+            randInd = randperm(length(rx));
+            
+            r_init(1,:)=rx(randInd);
+            r_init(2,:)=ry(randInd);
+                        
+            % Now actually distribute the particles. If even distribution
+            % is requested, take from r_init (and asign prtcl.r_init).
             for i=1:length(params.prtcl)
                 % dimensions of r
                 dim(1) = params.model_dim;
                 dim(2) = params.prtcl(i).Nprtcl;
                 randMat = rand(dim(1),dim(2));
                 
-                celldim = params.supercell.celldim;
-                
-                numOfMinInSupCell = params.supercell.celldim./params.unitcell.celldim.*params.unitcell.numOfPrmtvCells * 1;
-                
+                % set default r_inti values for all dimensions.
                 params.prtcl(i).r_init =  randMat .* celldim';
+                
+                % Equally spaced distribution (overied prev assignment, if required)
+                if 1
+                    disp('equally distributed particles')
+                    params.prtcl(i).r_init(1:2,:) = r_init(:,1:dim(2));
+                    r_init(:,1:dim(2)) = [];
+                end
                 
                 % set z_init to the bottom of the adsorption well (in 'z')
                 % If 'z' is enabled, its expected to be the 3rd dimension
