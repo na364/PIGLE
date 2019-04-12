@@ -26,6 +26,7 @@ clear changeCellArr
 changeCellArr(1,:)  = {'pos'     ,model_dim_Str,nopStr};
 changeCellArr(2,:)  = {'x'       ,fTbltdDim1Str,'1'};
 changeCellArr(3,:)  = {'fTbltd'  ,fTbltdDim1Str,fTbltdDim2Str};
+changeCellArr(3,:)  = {'celldim' ,model_dim_Str,'1'};
 changeCellArr(4,:)  = {'identity',nopStr       ,'1'};
 changeCellArr(5,:)  = {'f_perm'  ,fTbltdDim2Str,'2'};
 changeCellArr(6,:)  = {'f_func'  ,fTbltdDim2Str,'1'};

@@ -103,12 +103,12 @@ f_func_params = {[fparam1 4],[fparam2 4],[fparam3 4]};
 % out_cutoff_r - The supercell must be larger than that number (see calculate_sim_params.m).
 %                TODO: include in connection lists, once implemented
 % in_cutoff_r -  the force between particles will be calculated for r >= r_in
-out_cutoff_r = norm(unitcell.celldim)*100;
-in_cutoff_r = 0.01;
+out_cutoff_r = norm(unitcell.celldim)*10*0+49;
+in_cutoff_r = 0.1;
 
 % x_interactions - the points in which the force is to be calculated
 x_min = in_cutoff_r/10; % in Angstrom
-x_max = 50; % in Angstrom
+x_max = out_cutoff_r + 1; % in Angstrom
 numOfPoints_interactions = 500;
 x_interactions = linspace(x_min, x_max, numOfPoints_interactions); %x_min/max in Angstrom
 

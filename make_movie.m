@@ -44,6 +44,8 @@ prsdArgs.addParameter('k_view', {[30 65]}, @iscell);
 prsdArgs.addParameter('isf', [], @isnumeric);
 prsdArgs.addParameter('dK_indx', [], @isnumeric);
 prsdArgs.addParameter('show_trace', 0, @isnumeric);
+prsdArgs.addParameter('pesDigitization', 10, @isnumeric);
+
 prsdArgs.parse(varargin{:});
 
 loop_user_limit = prsdArgs.Results.loop_user_limit;
@@ -55,6 +57,7 @@ k_view = prsdArgs.Results.k_view;
 isf = prsdArgs.Results.isf;
 dK_indx = prsdArgs.Results.dK_indx;
 show_trace = prsdArgs.Results.show_trace;
+pesDigitization = prsdArgs.Results.pesDigitization;
 
 %% Calculate number of frames (=loops), the step size between frames, and reduce r_supercell to speed up
 if ~isfield(data.prtcl(1),'r_supercell')
@@ -93,8 +96,6 @@ lineStyle = {'-','--','-.','.'}; lineStyle = repmat(lineStyle,1,20);
 dim = params.supercell.celldim./params.unitcell.celldim;
 dim = round(dim);
 
-x = params.unitcell.x; y = params.unitcell.y;
-
 % If the PES has 'z' dimension with more than two 'layers' of XY, take the
 % XY PES for the minimum of the PES in 'z'
 if sum(params.z_enabled) > 1 && length(params.unitcell.z)>2
@@ -104,24 +105,22 @@ else
 end
 pes = squeeze(params.prtcl(1).pes.PotMatrix(:,:,z_minVindx,1));
 pes = pes-max(max(pes));
-x1 = x; y1 = y;
-for i=2:dim(1), x1 = [x1 x+(i-1)*params.unitcell.celldim(1)]; end
-for j=2:dim(2), y1 = [y1 y+(j-1)*params.unitcell.celldim(2)]; end
 
-pes1 = repmat(pes,dim(2),dim(1));
-X = repmat(x1,length(y1),1); Y = repmat(y1',1,length(x1));
-l=0; pes2=[];
-digitization = 2;
-for i=1:digitization:size(X,1)
-    l = l+1;
-    n=0;
-    for j=1:digitization:size(X,2)
-        n=n+1;
-        pes2(n,l)=pes1(i,j);
+% reduce the PES
+i_ = 0;
+for i=1:pesDigitization:size(pes,1)
+    i_ = i_ + 1; j_ = 0;
+    for j=1:pesDigitization:size(pes,2)
+        j_ = j_ + 1;
+        pes_(i_,j_)=pes(i,j);
     end
 end
-x2 = x1(1:digitization:end); y2 = y1(1:digitization:end);
-x2=x2'; pes2 = pes2'; pes3=pes2/max(max(abs(pes)))*2;
+
+pes1 = repmat(pes_,dim(2),dim(1));
+
+x2 = linspace(0,params.supercell.celldim(1),size(pes1,2)); % columns of pes1 are 'x'
+y2 = linspace(0,params.supercell.celldim(2),size(pes1,1)); % rows of pes1 are 'y'
+pes3=pes1/max(max(abs(pes)))*2;
 if isempty(find(~isnan(pes3),1)), pes3 = zeros(size(pes3)); end
 
 [x3,y3]=meshgrid(x2,y2);
@@ -201,7 +200,7 @@ for k=1:length(k_view)
     view(k_view{k})
     xlabel('x / $\rm{\AA}$', 'interpreter', 'LaTex');
     ylabel('y / $\rm{\AA}$', 'interpreter', 'LaTex');
-    zlabel('Potential Energy\n(Arbitrary Units)');
+    zlabel({'Potential Energy','(Arbitrary Units)'});
     title('Supercell position')
     axis equal;
     axis([0 params.supercell.celldim(1) 0 params.supercell.celldim(2) min(min(pes3)) max(max(pes3))+5+(params.z_enabled)*10])

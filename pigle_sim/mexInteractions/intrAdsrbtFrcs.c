@@ -115,7 +115,7 @@ void intrAdsrbtFrcs(double *iaf, const double * pos,
             }
 
             /* Interpulate the force for r */
-            interp1lin(x,fTbltd+(fTbltdDims[0]*(perm[0]-1)),fTbltdDims[0],r,&F);
+            interp1lin( (double *) x, (double *) fTbltd+(fTbltdDims[0]*(perm[0]-1)),fTbltdDims[0],r,&F);
                         
             F_parallel = F*R*rinv; /* F*sin_phi */
             

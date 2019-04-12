@@ -16,15 +16,23 @@ set_param('sl_pigle_main_current','PreloadFcn','load pigle_data.mat')
 set_param('sl_pigle_main_current','InitFcn','load pigle_data.mat')
 
 set_param('sl_pigle_main_current', 'StopTime', 'params.stop_time')
-add_block('simulink/Math Operations/Matrix Concatenate','sl_pigle_main_current/Matrix Concatenate')
-set_param('sl_pigle_main_current/Matrix Concatenate','NumInputs', num2str(length(params.prtcl)))
-add_block('sl_pigle_main_current/Matrix Concatenate','sl_pigle_main_current/Matrix Concatenate1')
-add_block('sl_pigle_main_current/Matrix Concatenate','sl_pigle_main_current/Matrix Concatenate2')
-add_block('simulink/Ports & Subsystems/Model','sl_pigle_main_current/Interactions')
-set_param('sl_pigle_main_current/Interactions','ModelFile','sl_interactions.slx')
-add_line('sl_pigle_main_current','Matrix Concatenate/1','Interactions/1','autorouting','smart')
-add_line('sl_pigle_main_current','Matrix Concatenate1/1','Interactions/2','autorouting','smart')
-add_line('sl_pigle_main_current','Matrix Concatenate2/1','Interactions/3','autorouting','smart')
+
+if params.interactions.active == 1
+    add_block('simulink/Math Operations/Matrix Concatenate','sl_pigle_main_current/Matrix Concatenate')
+    set_param('sl_pigle_main_current/Matrix Concatenate','NumInputs', num2str(length(params.prtcl)))
+    add_block('sl_pigle_main_current/Matrix Concatenate','sl_pigle_main_current/Matrix Concatenate1')
+    add_block('sl_pigle_main_current/Matrix Concatenate','sl_pigle_main_current/Matrix Concatenate2')
+
+    add_block('simulink/Ports & Subsystems/Model','sl_pigle_main_current/Interactions')
+    set_param('sl_pigle_main_current/Interactions','ModelFile','sl_interactions.slx')
+    add_line('sl_pigle_main_current','Matrix Concatenate/1','Interactions/1','autorouting','smart')
+    add_line('sl_pigle_main_current','Matrix Concatenate1/1','Interactions/2','autorouting','smart')
+    add_line('sl_pigle_main_current','Matrix Concatenate2/1','Interactions/3','autorouting','smart')
+else
+    add_block('simulink/Sources/Constant','sl_pigle_main_current/Interactions');
+    set_param('sl_pigle_main_current/Interactions','Value','zeros(params.model_dim,params.Nprtcl)')
+    set_param('sl_pigle_main_current/Interactions','VectorParams1D','off')
+end
 
 for i=1:length(params.prtcl)
     
@@ -35,9 +43,15 @@ for i=1:length(params.prtcl)
 
     delete_unconnected_lines(['sl_pigle_main_current'])
 
-    add_line('sl_pigle_main_current','Population 0/1',['Matrix Concatenate/' iStr],'autorouting','smart')
-    add_line('sl_pigle_main_current','identity 0/1',['Matrix Concatenate1/' iStr],'autorouting','smart')
-    add_line('sl_pigle_main_current','Population 0/4',['Matrix Concatenate2/' iStr],'autorouting','smart')
+    if params.interactions.active == 1
+        add_block('simulink/Sources/Constant',['sl_pigle_main_current/identity ' iStr]);
+        set_param(['sl_pigle_main_current/identity ' iStr],'Value',[iStr '*ones(1,params.prtcl('  iStr ').Nprtcl)'])
+        set_param(['sl_pigle_main_current/identity ' iStr],'VectorParams1D','off')
+        
+        add_line('sl_pigle_main_current','Population 0/1',['Matrix Concatenate/' iStr],'autorouting','smart')
+        add_line('sl_pigle_main_current',['identity ' iStr '/1'],['Matrix Concatenate1/' iStr],'autorouting','smart')
+        add_line('sl_pigle_main_current','Population 0/4',['Matrix Concatenate2/' iStr],'autorouting','smart')
+    end
     add_line('sl_pigle_main_current','Interactions/1','Selector 0/1','autorouting','smart')
     
     set_param('sl_pigle_main_current/Population 0','Name',['Population ' iStr])
@@ -50,9 +64,6 @@ for i=1:length(params.prtcl)
     set_param('sl_pigle_main_current/ws pos_supercell_0','Name',['ws pos_supercell_' iStr])
     set_param(['sl_pigle_main_current/ws freeze'],'VariableName',['freeze_' iStr])
     set_param(['sl_pigle_main_current/ws freeze'],'Name',['ws freeze ' iStr])
-
-    set_param('sl_pigle_main_current/identity 0','Name',['identity ' iStr])
-    set_param(['sl_pigle_main_current/identity ' iStr],'Value',[iStr '*ones(1,params.prtcl('  iStr ').Nprtcl)'])
 
     set_param('sl_pigle_main_current/Selector 0','Name',['Selector ' iStr])
     for j=1:i
