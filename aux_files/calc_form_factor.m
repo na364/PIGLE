@@ -26,9 +26,11 @@ end
     
 
 switch form_factor_conf.caseNum
+    case 0
+        FF = ones(size(dK)); FF_envelop = ones(size(dK));
     case 1
         r0         = form_factor_conf.hemisphere_radius;
-        [FF,FF_envelop,dK] = hemisphere_form_factor(beam_ki,r0,theta_i,theta_f);
+        [FF,FF_envelop,dK] = hemisphere_form_factor(beam_ki,r0,theta_i,theta_f);    
     otherwise
 end
 

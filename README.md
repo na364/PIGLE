@@ -47,10 +47,10 @@ PIGLE support parallel computing (via matlab/Simulink support).
 ####################
 
 PIGLE:
-aux        config_model.m   generatePES  make_movie.m     pigle_sim               prep_environment.m  run_pigle.m      sweepParams  UI
+aux_files        config_model.m   generatePES  make_movie.m     pigle_sim               prep_environment.m  run_pigle.m      sweepParams  UI
 benchmark  f_interaction.m  LICENSE.txt  pigle_data.mat  prepare_configuration.m  README.txt          surface_params.m  TODO.txt
 
-./aux:
+./aux_files:
 calc_kinetic_energy.m    calculate_sim_params.m                        generate_A_from_function.m  make_data_path.m  resample_data.m  timeinput.m
 calculate_average_isf.m  generate_A_from_frequencies_multiple_gamma.m  hlp_f.m                     prepFuncs.m       sim_gle_nd.m
 

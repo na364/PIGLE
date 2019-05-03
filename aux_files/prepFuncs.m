@@ -63,10 +63,16 @@ classdef prepFuncs
             
             % Prepare an r_init of evenly spreaded the particles
             Nprtcl = sum([params.prtcl.Nprtcl]);
-            celldim = params.supercell.celldim;
+            celldim = params.supercell.celldim;                
             
             rx = linspace(0,celldim(1)*0.9,ceil(sqrt(Nprtcl*1.5)));
             ry = linspace(0,celldim(2)*0.9,ceil(sqrt(Nprtcl*1.5)));
+            
+            videoFlag = 1; % to have the particle in thw mid of the frame
+            if Nprtcl == 1 && videoFlag == 1
+                rx = celldim(1)/2; ry = celldim(2)/2;
+            end
+            
             [RX,RY] = meshgrid(rx,ry);
             rx = RX(:);
             ry = RY(:);

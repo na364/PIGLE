@@ -23,7 +23,9 @@ n=-N:N; % small but irrelevant loss of efficiency using double sided sum
 n=n(:); % column
 [n,t]=meshgrid(n,t); 
 n=n'; t=t';% still don't understand meshgrid indexing
-isf=besselj(n,DK*r).*besselj(n,DK*r).*exp(-kb*T*n.^2.*(exp(-g*t)+g*t-1)/(I*g^2));
-isf=sum(isf,1); % leave us with a row
 
+for ind=1:length(DK)
+    isf_=besselj(n,DK(ind)*r).*besselj(n,DK(ind)*r).*exp(-kb*T*n.^2.*(exp(-g*t)+g*t-1)/(I*g^2));
+    isf(ind,:)=sum(isf_,1); % leave us with a row
+end
 

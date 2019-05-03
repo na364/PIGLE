@@ -91,7 +91,7 @@ end
 % Also, this part is badly written - needs rewriting
 
 colors = 'mbcrgk'; colors = repmat(colors,1,20);
-lineStyle = {'-','--','-.','.'}; lineStyle = repmat(lineStyle,1,20);
+lineStyle = {'-','--','-.'}; lineStyle = repmat(lineStyle,1,20);
 
 dim = params.supercell.celldim./params.unitcell.celldim;
 dim = round(dim);
@@ -127,7 +127,7 @@ if isempty(find(~isnan(pes3),1)), pes3 = zeros(size(pes3)); end
 fPES=scatteredInterpolant(x3(:),y3(:),pes3(:));
 
 for k=1:length(k_view)
-    subp_h(k) = subplot(length(k_view),2,k,'FontSize', 18);
+    subp_h(k) = subplot(length(k_view),2,k,'FontSize', 24);
     hold on; surf(x2,y2,pes3);
     shading interp; caxis([min(min(pes3)) max(max(pes3))])
 end
@@ -135,11 +135,11 @@ end
 %% Create background image - ISF
 if ~isempty(isf)
     if isempty(dK_indx), dK_indx = 1:size(isf,1); end
-    subp_h(length(k_view)+1) = subplot(length(k_view),2,length(k_view)+1,'FontSize', 18);
+    subp_h(length(k_view)+1) = subplot(length(k_view),2,length(k_view)+1,'FontSize', 24);
     hold on
     lgnd = {};
     for i=1:length(dK_indx)
-        h2(i) = plot(params.t(1),isf(i,1),lineStyle{i},'LineWidth',2);
+        h2(i) = plot(params.t(1),isf(i,1),lineStyle{i},'LineWidth',4);
         lgnd = {lgnd{:},['\Delta K = ' num2str(norm(params.dK(dK_indx(i))))]};
     end
     axis([params.t_isf(1) params.t_isf(end) -0.1 1])
@@ -227,7 +227,7 @@ for l = 1:loops
     
   %  delete(h1)
 %     surf(x2,y2,pes2); view(2)
-    title(['t = ' num2str(params.t(l*steps)) ' [ps] out of ' num2str(params.t(loops*steps)) ' [ps]'])
+    title(['t = ' num2str(round(params.t(l*steps))) ' [ps] out of ' num2str(round(params.t(loops*steps))) ' [ps]'])
 %     shading interp
     
     for i=1:length(data.prtcl)
@@ -235,7 +235,7 @@ for l = 1:loops
         r_conf1 = hlp_f.calc_new_r(data.prtcl(i).r_supercell(:,:,l*steps),data.prtcl(i).conf.r_conf,params.z_enabled,params.theta_enabled);
         if ~params.z_enabled, r_conf1 = [r_conf1;zeros(1,size(r_conf1,2))]; end
         r_conf1(3,:) = r_conf1(3,:) + 3;
-        if ~params.z_enabled, r_conf1(3,:) = r_conf1(3,:) + fPES(r_conf1(1,:),r_conf1(2,:)); end
+        if ~params.z_enabled, r_conf1(3,:) = r_conf1(3,:) + fPES(r_conf1(1,:),r_conf1(2,:))*0.3; end
         
         for j=1:size(r_conf1,2)
             for k=1:length(k_view)
