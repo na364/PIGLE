@@ -69,7 +69,7 @@ classdef prepFuncs
                 
                 celldim = params.supercell.celldim;
                 
-                numOfMinInSupCell = params.supercell.celldim./params.unitcell.celldim.*params.unitcell.numOfPrmtvCells * 1;
+                %numOfMinInSupCell = params.supercell.celldim./params.unitcell.celldim.*params.unitcell.numOfPrmtvCells * 1;
                 
                 params.prtcl(i).r_init =  randMat .* celldim';
                 
@@ -147,11 +147,12 @@ classdef prepFuncs
                 elseif exist('~/scratch','dir')
                     data_path = '~/scratch';
                 elseif exist('/tmp','dir')
-                    data_path = '/tmp/';
+                    data_path = '/tmp';
                 else
                     data_path = '';
                 end
                 
+		% convert symbolic links in linux to full path
                 if ~ispc
                     [~,b]=system(['readlink -f ' data_path]);
                     data_path = b(1:end-1);
@@ -159,7 +160,12 @@ classdef prepFuncs
                 serial = prepFuncs.get_serial_num(data_path);
                 
                 serstr = sprintf('%.6d',serial);
-                data_file = [data_path '/md_local_' serstr '.mat'];
+                filename = ['md_local_' serstr '.mat'];
+		if ispc
+			data_file = filename;
+		else
+			data_file = [data_path '/' filename];
+		end
                 filetime.creation=fix(clock);
                 save(data_file,'filetime');                
             end
