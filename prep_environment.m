@@ -31,7 +31,7 @@ end
 
 addpath(pigle_path)
 addpath([pigle_path '/UI'])
-addpath([pigle_path '/aux'])
+addpath([pigle_path '/aux_files'])
 addpath([pigle_path '/generatePES'])
 addpath([pigle_path '/generatePES/PES_library'])
 addpath([pigle_path '/pigle_sim'])
