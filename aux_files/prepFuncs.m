@@ -152,7 +152,7 @@ classdef prepFuncs
                     data_path = '';
                 end
                 
-		% convert symbolic links in linux to full path
+                % convert symbolic links in linux to full path
                 if ~ispc
                     [~,b]=system(['readlink -f ' data_path]);
                     data_path = b(1:end-1);
@@ -161,11 +161,10 @@ classdef prepFuncs
                 
                 serstr = sprintf('%.6d',serial);
                 filename = ['md_local_' serstr '.mat'];
-		if ispc
-			data_file = filename;
-		else
-			data_file = [data_path '/' filename];
-		end
+                data_file = filename;
+                if ~isempty(data_path)
+                    data_file = [data_path '/' filename];
+                end
                 filetime.creation=fix(clock);
                 save(data_file,'filetime');                
             end
