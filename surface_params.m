@@ -76,9 +76,9 @@ end
 % of particles. Later on, after the simmulation had completed, the ISF will
 % be calculated using these configurations.
 
-[r_conf(1:Nmass).caseNum] = deal(r_conf_case_num);
-[r_conf(1:Nmass).r0] = deal(r_conf_radius);
-[r_conf(1:Nmass).Natoms] = deal(r_conf_Natoms);
+[r_conf(1:Nmass).caseNum] = deal(r_conf_case_num{:});
+[r_conf(1:Nmass).r0] = deal(r_conf_radius{:});
+[r_conf(1:Nmass).Natoms] = deal(r_conf_Natoms{:});
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Translational Friction %
