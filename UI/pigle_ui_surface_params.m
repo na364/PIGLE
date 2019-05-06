@@ -34,9 +34,9 @@ Nmass = length(mass_list);
 % populations), or as a cell-array (with the i'th element distributed to the i'th
 % population)
 %
-r_conf_case_num = 1;
-r_conf_radius   = 0;
-r_conf_Natoms   = 1;
+r_conf_case_num = {1};
+r_conf_radius   = {0 2}; % the first species is defined as point particle, hence r=0, with one atom (r_conf_Natom)
+r_conf_Natoms   = {1 6};
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Translational Friction %

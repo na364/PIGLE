@@ -4,11 +4,11 @@
 
 z_enabled = 0;
 dKz_include_in_isf = 0;
-theta_enabled = 0;
+theta_enabled = 1;
 zero_p_init = 0; % set initial momentum be set to zero? (if set to 0, p_init will correspond to thermal distribution)
 interactions_active = 1;
 N_runs = 2;
-run_parallel = 0;
+run_parallel = 1;
 
 % Specify dk as a 2D vector, 3rd dim is azimuths.
 dk = [0.05 0.1 0.15 0.2:0.5:2.6];
