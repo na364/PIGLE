@@ -1,14 +1,14 @@
 
 %% params for surface_params.m
-T=200;
-Nprtcl_total = 5;
-mass_list = [28 28];
-radius = 1;
-number_density = [0.03 0.03];
-eta = 6 ; eta2 = 6;
-eta_theta = 4; eta_theta2 = 1;
-tau = [1 5];
-fparam = 50e4;
+T=200; % Temperature in Kelvin
+Nprtcl_total = 5; % will be rounded to justify the number density
+mass_list = [28 28]; % vector of masses for all species (one mass per species ...)
+radius = 1; % for calculating angular mass, however, one can define angular mass directly (see below)
+number_density = [0.03 0.03]; % relative number density for each mass.
+eta = 6 ; eta2 = 4; % helps to define variables down below, but the user can define it directly or using any other method
+eta_theta = 4; eta_theta2 = 1;  % helps to define variables down below, but the user can define it directly or using any other method
+tau = [1 5]; % helps to define variables down below, but the user can define it directly or using any other method
+fparam = 50e4; % helps to define variables down below, but the user can define it directly or using any other method
 
 a1=3.6147/sqrt(2);                          % Copper 111 lattice constant in Angstrom
 x0 = 0; nx = 30; xdim = a1;                 % x dimention params of the unitcell/PES
@@ -51,7 +51,7 @@ r_conf_Natoms   = {1 6};
 A_case = {1};
 A_w0   = {eta};
 A_dw   = {1./tau};
-A_eta  = {eta};
+A_eta  = {eta, eta2};
 A_tau  = {tau};
 
 %%%%%%%%%%%%%%%%%%%%
@@ -66,29 +66,40 @@ A_tau  = {tau};
 A_theta_case = {1};
 A_theta_w0   = {eta_theta};
 A_theta_dw   = {1};
-A_theta_eta  = {eta_theta};
+A_theta_eta  = {eta_theta, eta_theta2};
 A_theta_tau  = {1};
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Surface-Adsorbate Potential %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Pointers to the population specific functions for generating the PES
-PES_func_list = {@prepare_potential, @prepare_potential};
-%PES_func_list = {@loadPES, @loadPES, @loadPES};
+% For each population, PIGLE generate a potential of up to 4D (which will be called here PES, for potential energy surface).
+% PIGLE will generate the potential using a function which is defined by
+% the user, with parameters to that function defined by the user as well.
+
+% Cell Array of Pointers to the population specific functions for generating the PES
+% the functions should be placed under the folder generatePES
+% (use @loadPES if you generate the function outside of the execution)
+PES_func_list = {@prepare_potential, @prepare_potential}; % {@func1,@func2,...}
 
 % Define variables to hold the arguments which are stored in PES_arg_list (see below)
+% This file can be found under generatePES as well.
 params_for_function_prepare_potential
 
-% Define the arguments for PES generation.
-PES_arg_list = {unitcell, pot_strct(1); unitcell, pot_strct(1)};
+% Cell array of arguments for PES generation -
+% {var1_for_f1, ... var_n_for_f1 ; var1_for_f2, ... var_n_for_f2 ; ... ; var1_for_fn, ... var_n_for_fn}
+PES_arg_list = {unitcell, pot_strct(1); unitcell, pot_strct(2)};
 
 %% Parameters for Interactions
 
 % assign functions to species:
+% f_perm contains all the possible interaction cases. 1st species with
+% itself will be '1 1', 1st species with 2nd species will be '1 2'.
 % For each pair in f_perm, a function case is defined in f_func. This
-% function case is taken from f_interaction.m - and f_func_params contain
-% the arguments for each function.
+% function case is taken from f_interaction.m - for ex., case 1 stands for decaying repulsive force with power-law.
+% f_func_params contain the arguments for each function. For ex., for
+% functions of case '1', one needs to provide a prefactor (here fparam is
+% defined above), and the power, 4 (to represent a dipole-dipole force: -A*r^{-4}).
 f_perm = [1 1; 1 2; 2 2];
 f_func = [repmat(1,1,3)];
 f_func_params = {[fparam 4],[fparam 4],[fparam 4]};

@@ -23,14 +23,26 @@ representation of the molecular form factor, and also allows to visualize rotati
 
 Installation:
 -------------
-- Install Matlab (tested with 2017b). If working under Linux, make sure to obtain a supported version of a supported comipiler.
+
+- Install Matlab (tested with 2017b, with MS Windows 10 and Ubuntu 18).
+  If working under Linux, make sure to obtain a supported version of a supported comipiler.
+
 - Edit prep_environment.m
+  By default, pigle saves the results in filenames with incrementally increasing numbers, at the directory from which PIGLE is runned.
+  However, one can define a script name in 'data_path_script_name', to generate filenames as one wishes.
+  For complete description of how the path to the datafile is defined, see the function get_data_filename in aux_files/prepFuncs.m
 
 Execution of jobs:
 ------------------
-- Create a potential of your choise and save it as 'mat' file, or create a function which generates the potential.
+For running a simulation, one needs to define paramteres for the surface (e.g. temperature or mass),
+for the simulation (e.g. total simulation time), and for the post calculation procedures.
+
+- Configure the parameters in m-files under the subfolder UI: pigle_ui.m, pigle_ui_surface.m, pigle_wrapper_params.m
+  The comments in the files should be self explanatory.
+  When configuring UI/pigle_ui_surface.m, (also) pay attention to how the PES is define.  One needs to define the PES by either 
+  creating a potential of choise and save it as 'mat' file, or create a function which generates the potential.
   One can use the functions and scripts in the subfolder generatePES.
-- Configure the parameters in m-files under the subfolder UI.
+
 - Run 'run_pigle.m'
 
 Visualization:
