@@ -160,7 +160,8 @@ classdef prepFuncs
                 [data_path,~,~] = fileparts(data_file);
                 
             % Otherwise, if data_path_script_name is defined (see prep_environment), workout the data_path
-            % using user specific script            
+            % using user specific script - the script is expected to define
+            % data_file and data_path
             elseif exist('data_path_script_name','var') && ~isempty(data_path_script_name) && exist(data_path_script_name,'file')
                 if verbal, disp('data_path_script_name exist'); end
                 run(data_path_script_name);
@@ -178,6 +179,7 @@ classdef prepFuncs
                     data_path = '';
                 end
                 
+                % convert symbolic links to the actual path
                 if ~ispc
                     [~,b]=system(['readlink -f ' data_path]);
                     data_path = b(1:end-1);
@@ -185,7 +187,9 @@ classdef prepFuncs
                 serial = prepFuncs.get_serial_num(data_path);
                 
                 serstr = sprintf('%.6d',serial);
-                data_file = [data_path '/md_local_' serstr '.mat'];
+                filename = ['md_local_' serstr '.mat'];
+                data_file = [data_path '/' filename];
+                if ispc && isempty(data_path), data_file = filename; end
                 filetime.creation=fix(clock);
                 save(data_file,'filetime');                
             end

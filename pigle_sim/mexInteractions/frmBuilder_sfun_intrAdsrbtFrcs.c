@@ -37,7 +37,7 @@
 /* Input Port  0 */
 #define IN_PORT_0_NAME        pos
 #define INPUT_0_WIDTH 2
-#define INPUT_DIMS_0_COL 40
+#define INPUT_DIMS_0_COL 57
 #define INPUT_0_DTYPE         real_T
 #define INPUT_0_COMPLEX       COMPLEX_NO
 #define IN_0_FRAME_BASED      FRAME_NO
@@ -104,7 +104,7 @@
 #define IN_3_SLOPE            0.125
 /* Input Port  4 */
 #define IN_PORT_4_NAME        identity
-#define INPUT_4_WIDTH 40
+#define INPUT_4_WIDTH 57
 #define INPUT_DIMS_4_COL 1
 #define INPUT_4_DTYPE         real_T
 #define INPUT_4_COMPLEX       COMPLEX_NO
@@ -206,7 +206,7 @@
 #define IN_9_SLOPE            0.125
 /* Input Port  10 */
 #define IN_PORT_10_NAME        freeze
-#define INPUT_10_WIDTH 40
+#define INPUT_10_WIDTH 57
 #define INPUT_DIMS_10_COL 1
 #define INPUT_10_DTYPE         real_T
 #define INPUT_10_COMPLEX       COMPLEX_NO
@@ -240,7 +240,7 @@
 #define IN_11_SLOPE            0.125
 /* Input Port  12 */
 #define IN_PORT_12_NAME        clisti
-#define INPUT_12_WIDTH 40
+#define INPUT_12_WIDTH 57
 #define INPUT_DIMS_12_COL 1
 #define INPUT_12_DTYPE         int32_T
 #define INPUT_12_COMPLEX       COMPLEX_NO
@@ -257,8 +257,8 @@
 #define IN_12_SLOPE            0.125
 /* Input Port  13 */
 #define IN_PORT_13_NAME        clist
-#define INPUT_13_WIDTH 40
-#define INPUT_DIMS_13_COL 40
+#define INPUT_13_WIDTH 57
+#define INPUT_DIMS_13_COL 57
 #define INPUT_13_DTYPE         int32_T
 #define INPUT_13_COMPLEX       COMPLEX_NO
 #define IN_13_FRAME_BASED      FRAME_NO
@@ -277,7 +277,7 @@
 /* Output Port  0 */
 #define OUT_PORT_0_NAME       iaf
 #define OUTPUT_0_WIDTH 2
-#define OUTPUT_DIMS_0_COL 40
+#define OUTPUT_DIMS_0_COL 57
 #define OUTPUT_0_DTYPE        real_T
 #define OUTPUT_0_COMPLEX      COMPLEX_NO
 #define OUT_0_FRAME_BASED     FRAME_NO

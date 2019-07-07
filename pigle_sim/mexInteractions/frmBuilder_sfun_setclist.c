@@ -37,7 +37,7 @@
 /* Input Port  0 */
 #define IN_PORT_0_NAME        pos
 #define INPUT_0_WIDTH 2
-#define INPUT_DIMS_0_COL 40
+#define INPUT_DIMS_0_COL 57
 #define INPUT_0_DTYPE         real_T
 #define INPUT_0_COMPLEX       COMPLEX_NO
 #define IN_0_FRAME_BASED      FRAME_NO
@@ -72,7 +72,7 @@
 #define NUM_OUTPUTS           2
 /* Output Port  0 */
 #define OUT_PORT_0_NAME       clisti
-#define OUTPUT_0_WIDTH 40
+#define OUTPUT_0_WIDTH 57
 #define OUTPUT_DIMS_0_COL 1
 #define OUTPUT_0_DTYPE        int32_T
 #define OUTPUT_0_COMPLEX      COMPLEX_NO
@@ -88,8 +88,8 @@
 #define OUT_0_SLOPE           0.125
 /* Output Port  1 */
 #define OUT_PORT_1_NAME       clist
-#define OUTPUT_1_WIDTH 40
-#define OUTPUT_DIMS_1_COL 40
+#define OUTPUT_1_WIDTH 57
+#define OUTPUT_DIMS_1_COL 57
 #define OUTPUT_1_DTYPE        int32_T
 #define OUTPUT_1_COMPLEX      COMPLEX_NO
 #define OUT_1_FRAME_BASED     FRAME_NO

@@ -63,8 +63,9 @@ params.angular_mass_list = angular_mass_list;
 
 params.number_density = [number_density];
 
-if length(params.number_density) ~= length(params.mass_list)
-    error('numbe_density and mass_list have different lengthes')
+if length(params.number_density) ~= length(params.mass_list) ...
+        || length(params.angular_mass_list) ~= length(params.mass_list)
+    error('numbe_density, mass_list, and angular_mass_list - must have the same length lengthes')
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,6 +109,22 @@ form_factor_conf = rmfield(form_factor_conf,'hemisphere_radius');
 [A_strct(1:Nmass).eta]  = deal(A_eta{:});
 [A_strct(1:Nmass).tau]  = deal(A_tau{:});
 
+[params.prtcl(1:Nmass).A_spatial_depended_friction]    = deal(A_spatial_depended_friction{:});
+
+% Assign PESlike nD-array to each population, and scale friction
+% Order of dimensions: 1st - 'y', 2nd - 'x'. If 'z' dimension is enabled,
+% then the 'z' dimension is assumed to be 3rd, last dimension is angular (either 3rd or 4th).
+% So for example, PotMatrix(i,j) is the surface coordinate (j,i).
+for i=1:length(params.mass_list)
+    if params.prtcl(i).A_spatial_depended_friction == 1
+        [PESlike] = friction_func_list{i}(friction_arg_list{i,:});
+        PESlike = prepFuncs.adjust_PES(params,PESlike); % resuce PotMatrix to match the enabled dimensions
+        params.prtcl(i).friction.scaleMat = PESlike;
+    else
+        params.prtcl(i).friction.scaleMat = 1;
+    end
+end
+
 %%%%%%%%%%%%%%%%%%%%
 % Angular Friction %
 %%%%%%%%%%%%%%%%%%%%
@@ -118,6 +135,22 @@ form_factor_conf = rmfield(form_factor_conf,'hemisphere_radius');
 [A_theta_strct(1:Nmass).dw]     = deal(A_theta_dw{:});
 [A_theta_strct(1:Nmass).eta]    = deal(A_theta_eta{:});
 [A_theta_strct(1:Nmass).tau]    = deal(A_theta_tau{:});
+
+[params.prtcl(1:Nmass).A_spatial_depended_theta_friction]    = deal(A_spatial_depended_theta_friction{:});
+
+% Assign PESlike nD-array to each population, and scale friction
+% Order of dimensions: 1st - 'y', 2nd - 'x'. If 'z' dimension is enabled,
+% then the 'z' dimension is assumed to be 3rd, last dimension is angular (either 3rd or 4th).
+% So for example, PotMatrix(i,j) is the surface coordinate (j,i).
+for i=1:length(params.mass_list)
+    if params.prtcl(i).A_spatial_depended_theta_friction == 1
+        [PESlike] = theta_friction_func_list{i}(theta_friction_arg_list{i,:});
+        PESlike = prepFuncs.adjust_PES(params,PESlike); % resuce PotMatrix to match the enabled dimensions
+        params.prtcl(i).friction.theta_scaleMat = PESlike;
+    else
+        params.prtcl(i).friction.theta_scaleMat = 1;
+    end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Surface-Adsorbate Potential %

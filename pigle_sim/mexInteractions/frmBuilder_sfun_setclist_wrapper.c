@@ -40,7 +40,7 @@ const real_T *celldim, const int_T p_width0,
 const real_T *out_cutoff_r, const int_T p_width1)
 {
 /* %%%-SFUNWIZ_wrapper_Outputs_Changes_BEGIN --- EDIT HERE TO _END */
-int_T posDims[2]  = {2,40};
+int_T posDims[2]  = {2,57};
 
 if ( calc_clist[0] == (int32_T) 0)
 setclist(clisti,clist,pos,posDims,celldim,out_cutoff_r);

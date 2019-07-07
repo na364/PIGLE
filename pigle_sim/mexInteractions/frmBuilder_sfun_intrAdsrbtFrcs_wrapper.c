@@ -16,7 +16,7 @@
 #include <math.h>
 /* %%%-SFUNWIZ_wrapper_includes_Changes_END --- EDIT HERE TO _BEGIN */
 #define u_width 2
-#define y_width 40
+#define y_width 57
 
 /*
 * Create external references here.  
@@ -56,7 +56,7 @@ const real_T *size_Fint_1, const int_T p_width1,
 const real_T *model_dim_1, const int_T p_width2)
 {
 /* %%%-SFUNWIZ_wrapper_Outputs_Changes_BEGIN --- EDIT HERE TO _END */
-int_T posDims[2]  = {2,40};
+int_T posDims[2]  = {2,57};
 int_T fTbltdDims[2]  = {500,3};
 
 /*

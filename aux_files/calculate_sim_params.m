@@ -12,6 +12,20 @@ function params = calculate_sim_params(params, A_strct, A_theta_strct, r_conf)
 
 %% Calculate supercell properties
 
+% Currently, spatial dependent friction is supported only for single
+% particle in each population. That's because the GLE subsystem in the sim model 
+% isn't designed to accept friction which is particle specific - only population specific.
+% Since there's not much sense in having multiple species with single particle in each, its banned as well.
+% Furthermore, spatial dependent friction isn't supported with GLE at the
+% moment, so only friction matrix of dimension 1x1 is supported. This is
+% because the interpulation doesn't support extracting a sub-array (see the
+% sim model).
+if params.Nprtcl > 1 || ~isempty(find([A_strct(:).A_case] > 1,1)) || ~isempty(find([A_theta_strct(:).A_case] > 1,1))
+    if sum([params.prtcl.A_spatial_depended_friction])+sum([params.prtcl.A_spatial_depended_theta_friction]) > 0
+        error('Spatial dependent friction is supported ONLY for single particle and non-GLE friction');
+    end
+end
+
 % mass and number of particles
 Nprtcl_list = ceil(params.Nprtcl .* (params.number_density)/sum(params.number_density));
 
@@ -66,13 +80,13 @@ for i=1:length(params.mass_list)
     params.prtcl(i).angular_mass = params.angular_mass_list(i);
     params.prtcl(i).Nprtcl = Nprtcl_list(i);
     params.prtcl(i).A_strct = A_strct(i);
-    params.prtcl(i).A = calc_A(A_strct(i));
+    params.prtcl(i).A = calc_A(A_strct(i),params.prtcl(i).friction.scaleMat,params.prtcl(i).A_spatial_depended_friction);
     params.prtcl(i).A_theta_strct = A_theta_strct(i);
-    params.prtcl(i).A_theta = calc_A(A_theta_strct(i));
-    params.prtcl(i).momenta_dimension = length(params.prtcl(i).A);
-    params.prtcl(i).momenta_dimension_theta = length(params.prtcl(i).A_theta);
-    params.prtcl(i).B = calculate_B(params.prtcl(i).A, params.prtcl(i).mass, params.k_B, params.T);
-    params.prtcl(i).B_theta = calculate_B(params.prtcl(i).A_theta, params.prtcl(i).angular_mass, params.k_B, params.T);
+    params.prtcl(i).A_theta = calc_A(A_theta_strct(i),params.prtcl(i).friction.theta_scaleMat,params.prtcl(i).A_spatial_depended_theta_friction);
+    params.prtcl(i).momenta_dimension = size(params.prtcl(i).A,length(size(params.prtcl(i).friction.scaleMat))*params.prtcl(i).A_spatial_depended_friction+1);
+    params.prtcl(i).momenta_dimension_theta = size(params.prtcl(i).A_theta,length(size(params.prtcl(i).friction.theta_scaleMat))*params.prtcl(i).A_spatial_depended_theta_friction+1);
+    params.prtcl(i).B = calculate_B(params.prtcl(i).A, params.prtcl(i).mass, params.k_B, params.T,params.prtcl(i).momenta_dimension>1,params.prtcl(i).A_spatial_depended_friction);
+    params.prtcl(i).B_theta = calculate_B(params.prtcl(i).A_theta, params.prtcl(i).angular_mass, params.k_B, params.T,params.prtcl(i).momenta_dimension_theta>1,params.prtcl(i).A_spatial_depended_theta_friction);
 end
 
 %% Set defaults for data output (output everything).
@@ -80,7 +94,7 @@ params.last_position = inf;
 params.last_momenta = inf;
 end
 
-function A = calc_A(A_strct)
+function A = calc_A(A_strct,scaleMat,spatial_depended_friction_enabled)
 eta = A_strct.eta;
 tau = A_strct.tau;
 % A coefficient matrix:
@@ -121,14 +135,84 @@ switch A_strct.A_case
         A = [0,     -s1   ,   -s2   ; ...
             s1,   1/tau(1),    0    ; ...
             s2,      0    , 1/tau(2)];
-        
 end
+
+if spatial_depended_friction_enabled == 0
+    return;
+end
+
+% Now scale 'A' to get spatial dependent friction, using a PES-like array
+% The following code assumes that scaleMat (the PES-like scaling array) can
+% have different dimensions - that needs both better definision and also
+% better coding!
+Amat = zeros([size(scaleMat),size(A)]);
+for i=1:size(A,1)
+    for j=1:size(A,2)
+        switch length(size(scaleMat))
+            case 1 % no spatial depended friction
+                Amat(i,j) = A(i,j);
+            case 2
+                Amat(:,:,i,j) = A(i,j) * scaleMat;
+            case 3
+                Amat(:,:,:,i,j) = A(i,j) * scaleMat;
+            case 4 % up to 4 dimensions at the moment
+                Amat(:,:,:,:,i,j) = A(i,j) * scaleMat;
+        end
+    end
+end
+
+A = Amat;
 
 end
 
-function B = calculate_B(A, m, k_B, T)
+function B = calculate_B(Amat, m, k_B, T, isA2D, spatial_depended_friction_enabled)
 % Calculate the B matrix coefficients.
-B = real(sqrtm(m * k_B * T * (A + A.')));
+
+% If spatial-dependent-friction is not enabled, do simple calc of B
+if spatial_depended_friction_enabled == 0
+    A = Amat;
+    B = real(sqrtm(m * k_B * T * (A + A.')));
+    return;
+end
+
+
+% Amat is expected to have dimensions as follows:
+% dimensions of the PES + {0,2}, depends if the friction is GLE or not.
+% So if the PES is 4D, Amat=Amat(x,y,z,theta) or Amat=Amat(x,y,z,theta,:,:)
+% The B matrix needs to be calculated seperatly for each possible position
+% in the unit-cell.
+
+size_Amat = size(Amat);
+Bmat = zeros(size_Amat);
+
+nD_Amat = length(size_Amat);
+
+% Span all possible positions at the unitcell
+for i=1:(nD_Amat - isA2D*2)
+    vecs4perm{i} = [1:size_Amat(i)];
+end
+paramIndMat = prepFuncs.allPerm(vecs4perm{:});
+
+
+for i=1:size(paramIndMat,2)
+    if ~isA2D
+        A = Amat(paramIndMat{:,i});
+        B = real(sqrtm(m * k_B * T * (A + A.')));
+        Bmat(paramIndMat{:,i}) = B;
+    else
+        A = squeeze(Amat(paramIndMat{:,i},:,:));
+        warning('off');
+        B = real(sqrtm(m * k_B * T * (A + A.')));
+        if B^2 ~= (m * k_B * T * (A + A.'))
+            error('Calc B matrix faild')
+        end
+        warning('on');
+        Bmat(paramIndMat{:,i},:,:) = B;
+    end
+end
+
+B = Bmat;
+
 end
 
 function prmtvCellsInSprCell = PrmtvCellsInSprCell(superCellDim, params)
