@@ -3,7 +3,7 @@
 % This file is part of the PIGLE - Particles Interacting in Generalized Langevin Equation simulator, subject to the 
 % GNU/GPL-3.0-or-later.
 
-function [V,nx,ny,celldim, X, Y] = hexagonal(scalingF, celldim, nx, ny, A)
+function [V,nx,ny,celldim, X, Y] = hexagonal(celldim, nx, ny, scalingF, A, p)
 
 a=celldim(1);
 a1=celldim(1);
@@ -30,7 +30,13 @@ for ix=1:nx
     end
 end
 
-V = -V;
-V = V-max(max(V));
-V = V/(max(max(V))-min(min(V)));
-V = scalingF*V;
+% V = -V;
+% V = V-max(max(V));
+% V = V/(max(max(V))-min(min(V)));
+% V = scalingF*V;
+
+V = V+abs(min(V(:)));
+V = V./max(abs(V(:)));
+V = V.^p;
+V = V./max(abs(V(:)));
+V=V.*-1*scalingF; %negative pot

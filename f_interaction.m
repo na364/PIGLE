@@ -5,6 +5,7 @@
 
 function [ f ] = f_interaction( x,f_func,f_func_params )
 %F_INTERACTION computes the inter-particle force
+% The force dimensions are expected to be in meV/Angstrom
 %   Inputs:
 %       x             - a vector. Points along the distance between adsorbed particles at which the force is to be calculated
 %       f_func        - Case number. The type of force to consider.

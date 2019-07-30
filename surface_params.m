@@ -235,7 +235,8 @@ end
 % assign functions to species:
 % For each pair in f_perm, a function case is defined in f_func. This
 % function case is taken from f_interaction.m - and f_func_params contain
-% the arguments for each function.
+% the arguments for each function. The force dimensions are expected to be
+% in meV/Angstrom
 params.interactions.f_perm = f_perm;
 params.interactions.f_func = f_func;
 params.interactions.f_func_params = f_func_params;
