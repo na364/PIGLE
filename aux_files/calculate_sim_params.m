@@ -20,9 +20,15 @@ function params = calculate_sim_params(params, A_strct, A_theta_strct, r_conf)
 % moment, so only friction matrix of dimension 1x1 is supported. This is
 % because the interpulation doesn't support extracting a sub-array (see the
 % sim model).
-if params.Nprtcl > 1 || ~isempty(find([A_strct(:).A_case] > 1,1)) || ~isempty(find([A_theta_strct(:).A_case] > 1,1))
+if ~isempty(find([A_strct(:).A_case] > 1,1)) || ~isempty(find([A_theta_strct(:).A_case] > 1,1))
     if sum([params.prtcl.A_spatial_depended_friction])+sum([params.prtcl.A_spatial_depended_theta_friction]) > 0
-        error('Spatial dependent friction is supported ONLY for single particle and non-GLE friction');
+        error('Spatial dependent friction is supported ONLY for non-GLE friction');
+    end
+end
+
+if params.Nprtcl > 1
+    if sum([params.prtcl.A_spatial_depended_friction])+sum([params.prtcl.A_spatial_depended_theta_friction]) > 0
+        warning('Spatial dependent friction is supported ONLY for non-GLE friction');
     end
 end
 

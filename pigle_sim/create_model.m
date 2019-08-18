@@ -256,6 +256,16 @@ for i=1:length(params.prtcl)
             set_param([target_block_name '/A_nD_Array'],'NumSelectionDims','0');
             set_param([target_block_name '/B_nD_Array'],'NumSelectionDims','0');
         end
+        
+        add_line([target_block_name ''],{'PLU_y/1','PLU_y/2','PLU_y/1','PLU_y/2'},{'A_nD_Array/1','A_nD_Array/2','B_nD_Array/1','B_nD_Array/2'},'autorouting','smart')
+        add_line([target_block_name ''],{'PLU_x/1','PLU_x/2','PLU_x/1','PLU_x/2'},{'A_nD_Array/3','A_nD_Array/4','B_nD_Array/3','B_nD_Array/4'},'autorouting','smart')
+        if params.z_enabled
+            add_line([target_block_name ''],{'PLU_z/1','PLU_z/2','PLU_z/1','PLU_z/2'},{'A_nD_Array/5','A_nD_Array/6','B_nD_Array/5','B_nD_Array/6'},'autorouting','smart')
+        end
+        if params.theta_enabled
+            tmpPort = 5+params.z_enabled*2; tmpPortS = num2str(tmpPort); tmpPortS1 = num2str(tmpPort+1);
+            add_line([target_block_name ''],{'PLU_theta/1','PLU_theta/2','PLU_theta/1','PLU_theta/2'},{['A_nD_Array/' tmpPortS],['A_nD_Array/' tmpPortS],['B_nD_Array/' tmpPortS1],['B_nD_Array/' tmpPortS1]},'autorouting','smart')
+        end
 
         set_param([target_block_name '/A_nD_Array'],'Table',['params.prtcl(' iStr ').A'])
         set_param([target_block_name '/B_nD_Array'],'Table',['params.prtcl(' iStr ').B'])    
@@ -278,6 +288,16 @@ for i=1:length(params.prtcl)
             add_line([target_block_name ''],{'PLU_theta/1','PLU_theta/1'},{'A_nD_Array/5','B_nD_Array/5'},'autorouting','smart')
             add_line([target_block_name ''],{'PLU_theta/2','PLU_theta/2'},{'A_nD_Array/6','B_nD_Array/6'},'autorouting','smart')
         end
+        
+        % Set matrix multiplication in each LE/GLE block (i.e. 'x','y','dz' in each population block) to be multiply element wise.
+        set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dx/Matrix Multiply1'],'Multiplication','Element-wise(.*)')
+        set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dx/Matrix Multiply2'],'Multiplication','Element-wise(.*)')
+        set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dy/Matrix Multiply1'],'Multiplication','Element-wise(.*)')
+        set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dy/Matrix Multiply2'],'Multiplication','Element-wise(.*)')
+        if params.z_enabled
+            set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dz/Matrix Multiply1'],'Multiplication','Element-wise(.*)')
+            set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dz/Matrix Multiply2'],'Multiplication','Element-wise(.*)')
+        end        
     
     else
         delete_block(target_block_name);
@@ -302,12 +322,22 @@ for i=1:length(params.prtcl)
         set_param([target_block_name '/theta A_nD_Array'],'NumberOfTableDimensions',num2str(length(size(params.prtcl(i).A_theta))));
         set_param([target_block_name '/theta B_nD_Array'],'NumberOfTableDimensions',num2str(length(size(params.prtcl(i).A_theta))));
 
-        % An LE friction will have 1x1 dimensions, and the 'A' matrix won't
+        % An LE friction will have 1x1 dimensions, and the 'A_theta' matrix won't
         % have extra dimensions on top of the nD matrix which is used to spatially scale
-        % the friction
+        % the ROTATIONAL friction
         if length(size(params.prtcl(i).friction.theta_scaleMat)) == length(size(params.prtcl(i).A_theta))
             set_param([target_block_name '/theta A_nD_Array'],'NumSelectionDims','0');
             set_param([target_block_name '/theta B_nD_Array'],'NumSelectionDims','0');
+        end
+        
+        add_line([target_block_name ''],{'PLU_y/1','PLU_y/2','PLU_y/1','PLU_y/2'},{'theta A_nD_Array/1','theta A_nD_Array/2','theta B_nD_Array/1','theta B_nD_Array/2'},'autorouting','smart')
+        add_line([target_block_name ''],{'PLU_x/1','PLU_x/2','PLU_x/1','PLU_x/2'},{'theta A_nD_Array/3','theta A_nD_Array/4','theta B_nD_Array/3','theta B_nD_Array/4'},'autorouting','smart')
+        if params.z_enabled
+            add_line([target_block_name ''],{'PLU_z/1','PLU_z/2','PLU_z/1','PLU_z/2'},{'theta A_nD_Array/5','theta A_nD_Array/6','theta B_nD_Array/5','theta B_nD_Array/6'},'autorouting','smart')
+        end
+        if params.theta_enabled
+            tmpPort = 5+params.z_enabled*2; tmpPortS = num2str(tmpPort); tmpPortS1 = num2str(tmpPort+1);
+            add_line([target_block_name ''],{'PLU_theta/1','PLU_theta/2','PLU_theta/1','PLU_theta/2'},{['theta A_nD_Array/' tmpPortS],['theta A_nD_Array/' tmpPortS],['theta B_nD_Array/' tmpPortS1],['theta B_nD_Array/' tmpPortS1]},'autorouting','smart')
         end
 
         set_param([target_block_name '/theta A_nD_Array'],'Table',['params.prtcl(' iStr ').A_theta'])
@@ -330,6 +360,12 @@ for i=1:length(params.prtcl)
         if params.theta_enabled && ~params.z_enabled
             add_line([target_block_name ''],{'PLU_theta/1','PLU_theta/1'},{'theta A_nD_Array/5','theta B_nD_Array/5'},'autorouting','smart')
             add_line([target_block_name ''],{'PLU_theta/2','PLU_theta/2'},{'theta A_nD_Array/6','theta B_nD_Array/6'},'autorouting','smart')
+        end
+        
+        % Set matrix multiplication in each LE/GLE block (i.e. 'dtheta' in each population block) to be multiply element wise.
+        if params.theta_enabled
+            set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta/Matrix Multiply1'],'Multiplication','Element-wise(.*)')
+            set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta/Matrix Multiply2'],'Multiplication','Element-wise(.*)')
         end
         
     else
