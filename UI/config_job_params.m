@@ -11,8 +11,8 @@ proj_name = 'noProj'; % Folder under which MD results will be saved
 % as 'slurm')
 distributed_computing = 0;
 dist_comp_cmd = 'sbatch ~/pigle_sweep_slurm_submit.peta4-skylake';
-n_cores_available = 2; %  How many parallel processes can be used on the target machine
+n_cores_available = 6; %  How many parallel processes can be used on the target machine
 
 % Define the parameter space and values to be probed.
-sweepParams = {'eta','T'};
-sweepVal = {{[1],[2]},{300}};
+sweepParams = {'eta','mu0'};
+sweepVal = {{10},{0}};
