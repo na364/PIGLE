@@ -21,14 +21,14 @@ global pigle_path
 % the permutations. Following an execution of config_job.m, execute run_job.
 %
 % getting started:
-% * Edit config_job_params
+% * Edit config_job_params (under the user interface folder, <PIGLE HOME>/UI/ )
 % * run config_job - matlab will create <job_name> folder under the PIGLE
 %                    root folder.
 % * run 'run_job', either from MATLAB (if on a local computer), or
 %               externaly (if distributed computing is enabled and set at
 %               config_job_params).
 
-config_job_params
+run('../UI/config_job_params.m')
 
 tmp = mfilename('fullpath');
 [pigle_shell_path,~,~] = fileparts(tmp);
