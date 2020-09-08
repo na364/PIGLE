@@ -86,7 +86,7 @@ end
 for i=1:length(data.prtcl)
     
     [data.prtcl(i).KE, data.prtcl(i).Rot_KE] = ...
-        calc_kinetic_energy(data.prtcl(i),params.prtcl(i),params.k_B,params.z_enabled,params.theta_enabled,params.thetatilt_enabled,params.is_Euler);
+        calc_kinetic_energy(data.prtcl(i),params.prtcl(i),params.k_B,params.z_enabled,params.theta_enabled,params.thetatilt_enabled);
     
     disp(['mass =' num2str(params.prtcl(i).mass) ' ... T  = ' ...
         num2str(data.prtcl(i).KE) ' , ' num2str(data.prtcl(i).Rot_KE)])
