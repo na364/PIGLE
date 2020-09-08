@@ -31,7 +31,7 @@ params.run_parallel = run_parallel;
 params.conf3D2D=conf3D2D;
 
 
-if params.thetatilt_enabled==0 && ~params.theta_enabled==0, error('For tilt angle to be enabled, theta must also be enabled'); end
+if params.thetatilt_enabled && ~params.theta_enabled, error('For tilt angle to be enabled, theta must also be enabled'); end
 % Specify simulation time parameters
 % (those will be adjusted by the program, see below if interested)
 params.sample_time = sample_time;
