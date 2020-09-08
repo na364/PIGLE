@@ -162,7 +162,7 @@ for i=1:length(params.prtcl)
         set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta/zeros'],'Value',['zeros(params.prtcl(' iStr ').momenta_dimension_theta,params.prtcl(' iStr ').Nprtcl)'])
         set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta/ones'],'Value',['ones(params.prtcl(' iStr ').momenta_dimension_theta,1)'])
         set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta/Selector'],'IndexParamArray',{['1:params.prtcl(' iStr ').momenta_dimension_theta'],['1:params.prtcl(' iStr ').Nprtcl']})
-        set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta/mass'],'Value',['params.prtcl(' iStr ').angular_mass'])
+        set_param(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta/mass'],'Value',['params.prtcl(' iStr ').angular_mass(1)'])
     end
     if ~params.thetatilt_enabled
         delete_block(['sl_pigle_main_current/Population ' iStr '/Delta R/dtilt'])        
