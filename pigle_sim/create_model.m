@@ -223,7 +223,7 @@ if params.theta_enabled && ~params.thetatilt_enabled
     delete_block(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta/Subsystem1'])
     delete_block(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta/Add1'])
     delete_unconnected_lines(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta'])
-    add_line(['sl_pigle_main_current/Population ' iStr '/DeltaR/dtheta'],{'dU/1'},{'Matrix Concatenate/1'},'autorouting','smart')
+    add_line(['sl_pigle_main_current/Population ' iStr '/Delta R/dtheta'],{'dU/1'},{'Matrix Concatenate/1'},'autorouting','smart')
 end
     
     %% sl_pigle_main_current/Population 0/Absolute Position %
