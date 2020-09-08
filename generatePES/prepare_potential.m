@@ -59,7 +59,7 @@ switch pot_strct.anglecase
     case 0
         %No angular potential, only z variation
         for i=1:length(pot_strct.V)
-     v = pot_strct.V(i,:);
+     v = pot_strct.V(i);
 
      if pot_strct.is_potval(i)
          tmp = V_morse(pot_strct.ref_De(i), pot_strct.a(i), pot_strct.r_e(i), z')+v;
@@ -80,7 +80,7 @@ for i=1:length(pot_strct.V)
      for dum1=1:n_xyzthetatilt(3)
          for dum2=1:n_xyzthetatilt(4)
              for dum3 = 1:n_xyzthetatilt(5)
-    v(dum1,dum2,dum3) = pot_strct.V(i,:);
+    v(dum1,dum2,dum3) = pot_strct.V(i);
              end
          end
      end
