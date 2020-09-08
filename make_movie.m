@@ -99,11 +99,48 @@ dim = round(dim);
 % If the PES has 'z' dimension with more than two 'layers' of XY, take the
 % XY PES for the minimum of the PES in 'z'
 if sum(params.z_enabled) > 1 && length(params.unitcell.z)>2
-    [z_minV,z_minVindx]=min(params.prtcl(1).pes.PotMatrix(1,1,:,1));
+    [z_minV,z_minVindx]=min(params.prtcl(1).pes.PotMatrix(1,1,:,1,1));
 else
     z_minVindx=1;
 end
-pes = squeeze(params.prtcl(1).pes.PotMatrix(:,:,z_minVindx,1));
+if params.theta_enabled
+nxyz=size(para,s.prtcl(1).pes.PotMatrix);
+nx=nxyz(1);
+ny=nxyz(2);
+
+theta_minV_indx=zeros(nx,ny);
+tilt_minV_indx=zeros(nx,ny);
+%finds the minimum potential value for a given position
+for ix=1:nx
+    for iy=1:ny
+
+
+
+if params.thetatilt_enabled
+[tmpV,tmp_indx]=min(squeeze(params.prtcl(i).pes.PotMatrix(ix,iy,z_minVindx,:,:)));
+[tmpV,tilt_minV_indx(ix,iy)]=min(tmpV);
+theta_minV_indx(ix,iy)=tmp_indx(tilt_minV_indx(ix,iy));
+else
+    tilt_minV_indx=1;
+    [thetaminV,theta_minV_indx(ix,iy)]=min(params.prtcl(i).pes.PotMatrix(ix,iy,z_minVindx,:,1));
+end
+    end
+end
+tmp_pes=zeros(nx,ny,nxyz(3),nxyz(4),nxyz(5));
+for ix=1:nx
+    for iy=1:ny
+tmp_pes=params.prtcl(1).pes.PotMatrix(ix,iy,z_minVindx,theta_minV_indx,tilt_minV_indx);
+    end
+end
+pes = squeeze(tmp_pes);
+else
+    theta_minV_indx=1;
+    tilt_minV_indx=1;
+    pes = squeeze(params.prtcl(1).pes.PotMatrix(:,:,z_minVindx,theta_minV_indx,tilt_minV_indx));
+end
+
+
+
 pes = pes-max(max(pes));
 
 % reduce the PES
@@ -160,8 +197,8 @@ z=z*rSphere;
 % Plot the particles (either as points of spheres)
 for i=1:length(data.prtcl)
     Nprtcl = length(data.prtcl(i).r_supercell(1,:,1));
-    r_conf1 = hlp_f.calc_new_r(data.prtcl(i).r_supercell(:,:,1),data.prtcl(i).conf.r_conf,params.z_enabled,params.theta_enabled);
-    if ~params.z_enabled, r_conf1 = [r_conf1;zeros(1,size(r_conf1,2))]; end
+    r_conf1 = hlp_f.calc_new_r(data.prtcl(i).r_supercell(:,:,1),data.prtcl(i).conf.r_conf,params.z_enabled,params.theta_enabled,params.thetatilt_enabled,params.conf3D2D);
+    if ~params.z_enabled && ~params.conf3D2D, r_conf1 = [r_conf1;zeros(1,size(r_conf1,2))]; end
     r_conf1(3,:) = r_conf1(3,:) + 3;
     if ~params.z_enabled, r_conf1(3,:) = r_conf1(3,:) + fPES(r_conf1(1,:),r_conf1(2,:)); end
     
@@ -232,8 +269,8 @@ for l = 1:loops
     
     for i=1:length(data.prtcl)
         Nprtcl = length(data.prtcl(i).r_supercell(1,:,1));
-        r_conf1 = hlp_f.calc_new_r(data.prtcl(i).r_supercell(:,:,l*steps),data.prtcl(i).conf.r_conf,params.z_enabled,params.theta_enabled);
-        if ~params.z_enabled, r_conf1 = [r_conf1;zeros(1,size(r_conf1,2))]; end
+        r_conf1 = hlp_f.calc_new_r(data.prtcl(i).r_supercell(:,:,l*steps),data.prtcl(i).conf.r_conf,params.z_enabled,params.theta_enabled,params.thetatilt_enabled,params.conf3D2D);
+        if ~params.z_enabled && ~params.conf3D2D, r_conf1 = [r_conf1;zeros(1,size(r_conf1,2))]; end
         r_conf1(3,:) = r_conf1(3,:) + 3;
         if ~params.z_enabled, r_conf1(3,:) = r_conf1(3,:) + fPES(r_conf1(1,:),r_conf1(2,:))*0.3; end
         
@@ -274,3 +311,4 @@ disp('figure; movie(gcf,F,1,50)')
 disp('')
 disp('The movie can be SAVED with the commands:')
 disp('v = VideoWriter(''diff_20prtcl.mp4''); v.open; writeVideo(v,F); v.close; clear v')
+disp('If called from the command window, the data may be in ans instead of F')

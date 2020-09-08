@@ -11,7 +11,7 @@ function output = timeinput(t,default_string,default_title)
 % If a number is expected
 %   x = str2num(timeinput(20,'1'))
 %
-% ADDOPTED from MATLAB Answers forum, answer by MATLAB support team:
+% ADOPTED from MATLAB Answers forum, answer by MATLAB support team:
 % https://uk.mathworks.com/matlabcentral/answers/95301-how-can-i-implement-a-timer-dependent-input-request-in-matlab
 
 if nargin < 2

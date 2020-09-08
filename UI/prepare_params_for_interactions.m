@@ -1,7 +1,7 @@
 
 % %a1 - unitcell dimension, should be defined already
-unitcell_area = (sqrt(3)/2)*(a1^2);
-
+% unitcell_area = (sqrt(3)/2)*(a1^2); Hex
+unitcell_area =(a1^2);%square
 %% dipole dipole
 % mu0=3 ;
 % n0= 1 * 1/unitcell_area; alpha=20;

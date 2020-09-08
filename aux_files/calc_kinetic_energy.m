@@ -4,7 +4,7 @@
 % GNU/GPL-3.0-or-later.
 
 
-function [KE, Rot_KE] = calc_kinetic_energy(data_prtcl,params_prtcl,k_B,z_enabled,theta_enabled,time_steps)
+function [KE, Rot_KE] = calc_kinetic_energy(data_prtcl,params_prtcl,k_B,z_enabled,theta_enabled,tilt_enabled,time_steps)
 % CALC_KINETIC_ENERGY both translational and rotational
 % A function to calculate both rotational and translational KE, taking into
 % account whetehr translation includes 2 or three dimensions.
@@ -14,7 +14,8 @@ function [KE, Rot_KE] = calc_kinetic_energy(data_prtcl,params_prtcl,k_B,z_enable
 %       params_prtcl  - Pre-simulation configuration structure for one population of particles
 %       k_B           - Boltzman constant
 %       z_enabled     - is the third spatial dimension enabled
-%       theta_enabled - is the angular dimension enabled
+%       theta_enabled - is the first angular dimension enabled
+%       tilt_enabled  - are both angular dimensions enabled
 %       time_steps    - time steps to consider. If not defined, the default is 1:size(data_prtcl.p,3)
 %
 %   Outputs:
@@ -42,7 +43,12 @@ function [KE, Rot_KE] = calc_kinetic_energy(data_prtcl,params_prtcl,k_B,z_enable
     KE = mean(2*KE/k_B)/(2+int16(z_enabled > 0));
     
     if theta_enabled
-        Rot_KE = 0.5*(data_prtcl.p(3+int16(z_enabled > 0),:,:).^2)./params_prtcl.angular_mass;
+        thz=3+z_enabled;
+        Rot_KE = 0.5*(data_prtcl.p(thz,:,:).^2)./params_prtcl.angular_mass(1);
+        if tilt_enabled
+            tilz=4+z_enabled;
+            Rot_KE=Rot_KE+0.5*(data_prtcl.p(tilz,:,:).^2)./(params_prtcl.angular_mass(2)*sin(data_prtcl.r(3+z_enabled,:,:)).^2);
+        end
         Rot_KE = squeeze(Rot_KE);
         if z_enabled > 0
             for j=1:length(data_prtcl.freeze)
@@ -52,7 +58,7 @@ function [KE, Rot_KE] = calc_kinetic_energy(data_prtcl,params_prtcl,k_B,z_enable
             end
         end
         Rot_KE = reshape(Rot_KE,1,[]); Rot_KE = Rot_KE(~isnan(Rot_KE));
-        Rot_KE = mean(2*Rot_KE/k_B);
+        Rot_KE = mean(2*Rot_KE/(k_B*(theta_enabled+tilt_enabled)));
     else
         Rot_KE = NaN;
     end

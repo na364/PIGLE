@@ -37,6 +37,7 @@ addpath([pigle_path '/aux_files'])
 addpath([pigle_path '/generatePES'])
 addpath([pigle_path '/generatePES/PES_library'])
 addpath([pigle_path '/pigle_sim'])
+addpath([pigle_path '/pigle_sim/mexInteractions']) %Changed
 
 if ~exist('proj_name','var'), proj_name=''; end
 

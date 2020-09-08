@@ -8,7 +8,7 @@
 % Calculate the simulation parameters based on physical inputs.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function params = calculate_sim_params(params, A_strct, A_theta_strct, r_conf)
+function params = calculate_sim_params(params, A_strct, A_theta_strct, A_tilt_strct, r_conf)
 
 %% Calculate supercell properties
 
@@ -54,13 +54,19 @@ if params.interactions.out_cutoff_r > min(params.supercell.celldim) && params.in
     warning('out_cutoff_r > params.supercell.celldim. Reduce out_cutoff_r or number_density, or, increase Nprtcl.')
 end
 
-if params.model_dim > 2
+if params.z_enabled
     params.supercell.celldim(3) = params.unitcell.celldim(3);
 end
-if params.theta_enabled
-    params.supercell.celldim(params.model_dim) = 2*pi;
+if params.theta_enabled && params.z_enabled
+    params.supercell.celldim(4) = params.unitcell.celldim(4);%2*pi;
+elseif params.theta_enabled && ~params.z_enabled
+    params.supercell.celldim(3)=params.unitcell.celldim(3);
 end
-
+if params.thetatilt_enabled && params.z_enabled
+    params.supercell.celldim(5)= params.unitcell.celldim(5);%2*pi;
+elseif params.thetatilt_enabled && ~params.z_enabled
+    params.supercell.celldim(4)= params.unitcell.celldim(4);%2*pi;
+end
 % Now, after optimizing the supercell size to as close as possible to
 % requirements, adjust number of particles to make coverage as accurate as
 % possible.
@@ -83,16 +89,20 @@ end
 
 for i=1:length(params.mass_list)    
     params.prtcl(i).mass = params.mass_list(i);
-    params.prtcl(i).angular_mass = params.angular_mass_list(i);
+    params.prtcl(i).angular_mass = params.angular_mass_list(i,:);
     params.prtcl(i).Nprtcl = Nprtcl_list(i);
     params.prtcl(i).A_strct = A_strct(i);
     params.prtcl(i).A = calc_A(A_strct(i),params.prtcl(i).friction.scaleMat,params.prtcl(i).A_spatial_depended_friction);
     params.prtcl(i).A_theta_strct = A_theta_strct(i);
+    params.prtcl(i).A_tilt_strct = A_tilt_strct(i);
     params.prtcl(i).A_theta = calc_A(A_theta_strct(i),params.prtcl(i).friction.theta_scaleMat,params.prtcl(i).A_spatial_depended_theta_friction);
+    params.prtcl(i).A_tilt = calc_A(A_tilt_strct(i),params.prtcl(i).friction.tilt_scaleMat,params.prtcl(i).A_spatial_depended_tilt_friction);
     params.prtcl(i).momenta_dimension = size(params.prtcl(i).A,length(size(params.prtcl(i).friction.scaleMat))*params.prtcl(i).A_spatial_depended_friction+1);
     params.prtcl(i).momenta_dimension_theta = size(params.prtcl(i).A_theta,length(size(params.prtcl(i).friction.theta_scaleMat))*params.prtcl(i).A_spatial_depended_theta_friction+1);
+    params.prtcl(i).momenta_dimension_tilt = size(params.prtcl(i).A_tilt,length(size(params.prtcl(i).friction.tilt_scaleMat))*params.prtcl(i).A_spatial_depended_tilt_friction+1);
     params.prtcl(i).B = calculate_B(params.prtcl(i).A, params.prtcl(i).mass, params.k_B, params.T,params.prtcl(i).momenta_dimension>1,params.prtcl(i).A_spatial_depended_friction);
-    params.prtcl(i).B_theta = calculate_B(params.prtcl(i).A_theta, params.prtcl(i).angular_mass, params.k_B, params.T,params.prtcl(i).momenta_dimension_theta>1,params.prtcl(i).A_spatial_depended_theta_friction);
+    params.prtcl(i).B_theta = calculate_B(params.prtcl(i).A_theta, params.prtcl(i).angular_mass(1), params.k_B, params.T,params.prtcl(i).momenta_dimension_theta>1,params.prtcl(i).A_spatial_depended_theta_friction);
+    params.prtcl(i).B_tilt = calculate_B(params.prtcl(i).A_tilt, params.prtcl(i).angular_mass(2), params.k_B, params.T,params.prtcl(i).momenta_dimension_tilt>1,params.prtcl(i).A_spatial_depended_tilt_friction);
 end
 
 %% Set defaults for data output (output everything).

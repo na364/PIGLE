@@ -43,6 +43,8 @@ function [data, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_i
     z_enabled = params.z_enabled;
     dKz_include_in_isf = params.dKz_include_in_isf;
     theta_enabled = params.theta_enabled;
+    thetatilt_enabled=params.thetatilt_enabled;
+    conf3D2D=params.conf3D2D;
     
     sum_Skw_c_CoM = 0;
     sum_Skw_inc_CoM = 0;
@@ -75,7 +77,7 @@ function [data, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_i
         % Calculate the scattered amplitudes for our value of dK.
         if length(data) > 1
             parfor j=1:length(data)
-                [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(dK, data(j),z_enabled,dKz_include_in_isf,theta_enabled);
+                [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(dK, data(j),z_enabled,dKz_include_in_isf,theta_enabled,thetatilt_enabled,conf3D2D);
 
                 % Add to the running total Skw.
                 sum_Skw_c_CoM = sum_Skw_c_CoM + Skw_c_CoM;
@@ -86,7 +88,7 @@ function [data, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_i
                 sum_Skw_1 = sum_Skw_1 + Skw_1;
             end
         else % reduce the overhead of parfor for one itteration
-            [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(dK, data, z_enabled,dKz_include_in_isf,theta_enabled);
+            [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(dK, data, z_enabled,dKz_include_in_isf,theta_enabled,thetatilt_enabled,conf3D2D);
             
             % Add to the running total Skw.
             sum_Skw_c_CoM = sum_Skw_c_CoM + Skw_c_CoM;
@@ -145,16 +147,16 @@ data = sim_gle_nd(params,n_parall_runs);
 
 end
 
-function [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(delta_k, data,z_enabled,dKz_include_in_isf,theta_enabled)
+function [Skw_c_CoM,Skw_inc_CoM,Skw_1_CoM,Skw_c,Skw_inc,Skw_1] = scattered_amplitudes(delta_k, data,z_enabled,dKz_include_in_isf,theta_enabled,tilt_enabled,conf3D2D)
 % Calculate the scattering amplitude for a given delta k vector
 
 %% Center of Mass
 A_c_CoM = zeros(size(delta_k,1),size(data.prtcl(1).r,3));
 Skw_inc_CoM = A_c_CoM;
 
-if z_enabled > 0 && dKz_include_in_isf
+if dKz_include_in_isf
     if size(delta_k,2) < 3, delta_k(:,3) = zeros(size(delta_k,1),1); end
-elseif size(delta_k,2) == 3
+elseif size(delta_k,2) == 3 && ~conf3D2D
     error('delta_k is 3D, but z dimension is disabled')
 end    
 
@@ -166,7 +168,7 @@ for j=1:length(data.prtcl)
     FF_CoM = reshape(FF_CoM,[],1);    
     
     for i=1:size(r,2)
-        r_i = squeeze(r(1:(2 + (z_enabled > 0 && dKz_include_in_isf)),i,:));
+        r_i = squeeze(r(1:(2 + (dKz_include_in_isf && z_enabled)),i,:));
         A_i = FF_CoM .* exp(1i * (delta_k * r_i));
         A_c_CoM = A_c_CoM + A_i;
         Skw_1_CoM = conj(fft(A_i,[],2)).*fft(A_i,[],2);
@@ -200,7 +202,7 @@ else
     for j=1:length(data.prtcl)
         r = data.prtcl(j).r;
         r_conf = data.prtcl(j).conf.r_conf;
-        r1 = hlp_f.calc_new_r(r,r_conf,z_enabled,theta_enabled);
+        r1 = hlp_f.calc_new_r(r,r_conf,z_enabled,theta_enabled,tilt_enabled,conf3D2D);
         
         % Prep FF for the calculation.
         % TODO check if it works for Natoms>1 etc.
@@ -212,7 +214,7 @@ else
         FF = repmat(FF_tmp,1,size(r,2));
 
         for i=1:size(r1,2)
-            r_i = squeeze(r1(1:(2 + (z_enabled > 0 && dKz_include_in_isf)),i,:));
+            r_i = squeeze(r1(1:(2 + (conf3D2D && dKz_include_in_isf)),i,:));
             A_i = FF(:,i) .* exp(1i * (delta_k * r_i));
             A_c = A_c + A_i;
             Skw_1 = conj(fft(A_i,[],2)).*fft(A_i,[],2);

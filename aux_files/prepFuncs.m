@@ -1,4 +1,5 @@
 % Copyright (c) 2018, Nadav Avidor.
+% Copyright (c) 2020, Daniel Cropper.
 % All rights reserved.
 % This file is part of the PIGLE - Particles Interacting in Generalized Langevin Equation simulator, subject to the 
 % GNU/GPL-3.0-or-later.
@@ -18,11 +19,13 @@ classdef prepFuncs
             prsdArgs.addParameter('numOfPrmtvCells', [1 1], @isnumeric);
             prsdArgs.addParameter('z', [], @isnumeric);
             prsdArgs.addParameter('theta', [], @isnumeric);
+            prsdArgs.addParameter('tilt', [], @isnumeric);
             prsdArgs.parse(varargin{:});
 
             numOfPrmtvCells = prsdArgs.Results.numOfPrmtvCells;
             z              = prsdArgs.Results.z;
             theta              = prsdArgs.Results.theta;
+            tilt=prsdArgs.Results.tilt;
             
             if size(numOfPrmtvCells) ~= [1 2], error('numOfPrmtvCells is not of size [1 2]'); end
 
@@ -53,6 +56,13 @@ classdef prepFuncs
                 celldim = [celldim thetadim];
             end
             
+            if ~isempty(tilt) && tilt(4) == 1
+                ntilt = tilt(1); tiltdim = tilt(2); tilt0 = tilt(3);
+                dtilt = tiltdim/ntilt; tilt = tilt0:dtilt:tiltdim-dtilt;
+                unitcell.tilt = tilt;
+                celldim = [celldim tiltdim];
+            end
+            
             unitcell.celldim = celldim;
         end
         function params = r_init(params)
@@ -61,7 +71,7 @@ classdef prepFuncs
             % particle, with the exception that the potision in 'z' dimension, if
             % enabled, is set to be at the min of the potential.
             
-            % Prepare an r_init of evenly spreaded the particles
+            % If uniform_dist is enabled, it prepares an r_init of evenly spread out particles
             Nprtcl = sum([params.prtcl.Nprtcl]);
             celldim = params.supercell.celldim;                
             
@@ -88,12 +98,31 @@ classdef prepFuncs
                 dim(1) = params.model_dim;
                 dim(2) = params.prtcl(i).Nprtcl;
                 randMat = rand(dim(1),dim(2));
-                
-                % set default r_inti values for all dimensions.
+%                 set default r_init values for all dimensions.
                 params.prtcl(i).r_init =  randMat .* celldim';
-                
-                % Equally spaced distribution (overied prev assignment, if required)
-                if 1
+%                 if params.z_enabled && params.theta_enabled && params.thetatilt_enabled
+%                 % set default r_inti values for all dimensions.
+%                 params.prtcl(i).r_init =  randMat(:,i) .* celldim';
+%                 elseif ~params.z_enabled && params.theta_enabled && params.thetatilt_enabled
+%                     params.prtcl(i).r_init([1 2 4 5]) =  randMat(:,i) .* celldim';
+%                 elseif params.z_enabled && params.theta_enabled && ~params.thetatilt_enabled
+%                     params.prtcl(i).r_init([1 2 3 4]) =  randMat(:,i) .* celldim';
+%                     params.prtcl(i).r_init(5)=0;
+%                 elseif ~params.z_enabled && params.theta_enabled && ~params.thetatilt_enabled
+%                     params.prtcl(i).r_init([1 2 4]) =  randMat(:,i) .* celldim';
+%                     params.prtcl(i).r_init(5)=0;
+%                 elseif params.z_enabled && ~params.theta_enabled && ~params.thetatilt_enabled
+%                     params.prtcl(i).r_init([1 2 3]) =  randMat(:,i) .* celldim';
+%                     params.prtcl(i).r_init(5)=0;
+%                     params.prtcl(i).r_init(4)=0;
+%                 elseif ~params.z_enabled && ~params.theta_enabled && ~params.thetatilt_enabled
+%                     params.prtcl(i).r_init([1 2]) =  randMat(:,i) .* celldim';
+%                     params.prtcl(i).r_init(5)=0;
+%                     params.prtcl(i).r_init(4)=0;
+%                     params.prtcl(i).r_init(3)=0;
+%                 end
+               % Equally spaced distribution (overied prev assignment, if required)
+                if params.uniform_dist==1
                     disp('equally distributed particles')
                     params.prtcl(i).r_init(1:2,:) = r_init(:,1:dim(2));
                     r_init(:,1:dim(2)) = [];
@@ -101,11 +130,71 @@ classdef prepFuncs
                 
                 % set z_init to the bottom of the adsorption well (in 'z')
                 % If 'z' is enabled, its expected to be the 3rd dimension
-                if params.z_enabled > 0
+                if params.z_enabled && (params.theta_enabled && ~params.thetatilt_enabled)
                     [z_minV,z_minV_indx]=min(params.prtcl(i).pes.PotMatrix(1,1,:,1));
                     params.prtcl(i).r_init(3,:) = repmat(params.unitcell.z(z_minV_indx),1,dim(2));
+                elseif params.z_enabled && params.thetatilt_enabled
+                    [z_minV,z_minV_indx]=min(params.prtcl(i).pes.PotMatrix(1,1,:,1,1));
+                    params.prtcl(i).r_init(3,:) = repmat(params.unitcell.z(z_minV_indx),1,dim(2));
+                     elseif params.z_enabled && ~params.theta_enabled
+                    [z_minV,z_minV_indx]=min(params.prtcl(i).pes.PotMatrix(1,1,:));
+                    params.prtcl(i).r_init(3,:) = repmat(params.unitcell.z(z_minV_indx),1,dim(2));
                 end
-            end
+                %set theta_init to minimum
+                if params.z_enabled
+                if params.theta_enabled && ~params.thetatilt_enabled
+                    [thetaminV,theta_minV_indx]=min(params.prtcl(i).pes.PotMatrix(1,1,1,:));
+                    params.prtcl(i).r_init(3+params.z_enabled,:)=repmat(params.unitcell.theta(theta_minV_indx),1,dim(2));
+                end
+                if params.thetatilt_enabled
+                    xindex=ceil(mod(params.prtcl(i).r_init(1,:),params.unitcell.celldim(1))/params.unitcell.x(2));
+                    yindex=ceil(mod(params.prtcl(i).r_init(2,:),params.unitcell.celldim(2))/params.unitcell.y(2));
+                    for ex1=1:length(xindex)
+                        if xindex(ex1)==0
+                            xindex(ex1)=length(parms.unitcell.x);
+                            
+                        end
+                        if yindex(ex1)==0
+                            yindex(ex1)=length(params.unitcell.y);
+                        end
+                    end
+                            
+                    for dummy=1:dim(2)
+                    [thetaminV,tmp_indx]=min(params.prtcl(i).pes.PotMatrix(xindex(dummy),yindex(dummy),1,:,:));
+                    [minV,tilt_minV_indx]=min(thetaminV);
+                    theta_minV_indx=tmp_indx(tilt_minV_indx);
+                    params.prtcl(i).r_init(3+params.z_enabled,dummy)=params.unitcell.theta(theta_minV_indx);                    
+                    params.prtcl(i).r_init(4+params.z_enabled,dummy)=params.unitcell.tilt(tilt_minV_indx);
+                    end
+                end
+                else
+                if params.theta_enabled && ~params.thetatilt_enabled
+                    [thetaminV,theta_minV_indx]=min(params.prtcl(i).pes.PotMatrix(1,1,:));
+                    params.prtcl(i).r_init(3+params.z_enabled,:)=repmat(params.unitcell.theta(theta_minV_indx),1,dim(2));
+                end
+                if params.thetatilt_enabled
+                    xindex=ceil(mod(params.prtcl(i).r_init(1,:),params.unitcell.celldim(1))/params.unitcell.x(2));
+                    yindex=ceil(mod(params.prtcl(i).r_init(2,:),params.unitcell.celldim(2))/params.unitcell.y(2));
+                    for ex1=1:length(xindex)
+                        if xindex(ex1)==0
+                            xindex(ex1)=length(parms.unitcell.x);
+                            
+                        end
+                        if yindex(ex1)==0
+                            yindex(ex1)=length(params.unitcell.y);
+                        end
+                    end
+                    for dummy=1:dim(2)
+                    [thetaminV,tmp_indx]=min(params.prtcl(i).pes.PotMatrix(xindex(dummy),yindex(dummy),:,:));
+                    [minV,tilt_minV_indx]=min(thetaminV);
+                    theta_minV_indx=tmp_indx(tilt_minV_indx);
+                    params.prtcl(i).r_init(3+params.z_enabled,dummy)=params.unitcell.theta(theta_minV_indx);
+                    params.prtcl(i).r_init(4+params.z_enabled,dummy)=params.unitcell.tilt(tilt_minV_indx);
+                    end
+                end 
+                    
+                end
+              end
             
         end
         
@@ -130,8 +219,12 @@ classdef prepFuncs
                 m = params.prtcl(i).mass;
                 m = repmat(m,2+double(params.z_enabled>0),1);
                 if params.theta_enabled > 0
-                    m = [m ; params.prtcl(i).angular_mass];
+                    m = [m ; params.prtcl(i).angular_mass(1)];
                 end
+                if params.thetatilt_enabled>0
+                    m=[m;params.prtcl(i).angular_mass(2)];
+                end
+                
                 m = repmat(m,1,dim(2),dim(3));
                 params.prtcl(i).p_init = sign_mat .* sqrt(-1.0 * params.k_B .* m .* params.T .* log(1.0-rand_mat));
             end
@@ -255,8 +348,29 @@ classdef prepFuncs
             % is not enabled, the PES will be rediced to V=V(x,y,z1), where
             % z1 is the z-value in which the PES is minimal (so called bottom of the
             % well, calculated for [x,y]=[1,1]).
-            
-            if length(size(PotMatrix)) == 4
+            len=size(PotMatrix);
+            if length(size(PotMatrix))==5
+                if ~params.z_enabled
+                    [zv1,z_indx]=min(PotMatrix(1,1,:,1,1));
+                    PotMatrix=PotMatrix(:,:,z_indx,:,:);
+                end
+                if ~params.theta_enabled
+                    for ix=1:len(1)
+                        for iy=1:len(2)
+                    [thetav1,tmp_indx]=min(squeeze(PotMatrix(ix,iy,1,:,:)));
+                    [minV,tilt_indx]=min(thetav1);
+                    theta_indx=tmp_indx(tilt_indx);                    
+                    PotMatrix(ix,iy,:,:,:)=PotMatrix(ix,iy,:,theta_indx,tilt_indx);
+                        end
+                    end
+                end
+                if params.theta_enabled && ~params.thetatilt_enabled
+                    
+                    [tiltminV,tilt_index]=min(PotMatrix(1,1,1,1,:));
+                    PotMatrix=PotMatrix(:,:,:,:,tilt_index);
+                    
+                end
+            elseif length(size(PotMatrix)) == 4
                 if ~params.z_enabled
                     [zvl,indx] = min(PotMatrix(1,1,:,1));
                     PotMatrix = PotMatrix(:,:,indx,:);

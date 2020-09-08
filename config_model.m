@@ -5,7 +5,7 @@
 
 % Config_model.m allows one to both configure the simulation and the post analysis
 % routines (if enabled). For the simulation, here you can define the dimentions of
-% the simulation (2D-4D), enable inter-adsorbate interactions (and define), enable
+% the simulation (2D-5D), enable inter-adsorbate interactions (and define), enable
 % parallelization and time constants (step, decimation/isf, total, thermalization). For the post-analysis (calculation of the ISF), define whether to
 % include the prependicular direction in calculatin gthe ISF, the number of repetitions
 % (N_run) and the momentum transfer in which the ISF is to be calculated. 
@@ -20,13 +20,18 @@ params.k_B = 0.8317035; % Boltzmann constant in Aˆ2 amu psˆ-2 Kˆ-1 .... 8.617
 pigle_ui
 
 params.z_enabled = z_enabled;
+params.uniform_dist=uniform_dist;
 params.dKz_include_in_isf = dKz_include_in_isf;
 params.theta_enabled = theta_enabled;
+params.thetatilt_enabled=thetatilt_enabled;
 params.zero_p_init = zero_p_init; % set initial momentum be set to zero? (if set to 0, p_init will correspond to thermal distribution)
 params.interactions.active = interactions_active;
 params.N_runs = N_runs;
 params.run_parallel = run_parallel;
+params.conf3D2D=conf3D2D;
 
+
+if ~params.thetatilt_enabled==0 && params.theta_enabled==0, error('For tilt angle to be enabled, theta must also be enabled'); end
 % Specify simulation time parameters
 % (those will be adjusted by the program, see below if interested)
 params.sample_time = sample_time;
@@ -49,9 +54,10 @@ params.theta_tot                = theta_tot;
 
 %% Config dimentions and parallelization
 
-if ~params.z_enabled, params.dKz_include_in_isf = 0; end
+if ~params.z_enabled && ~conf3D2D, params.dKz_include_in_isf = 0; 
+else params.dKz_include_in_isf = 1;  end
 
-params.model_dim = 4-(~params.z_enabled)-(~params.theta_enabled);
+params.model_dim = 5-(~params.z_enabled)-(~params.theta_enabled)-(~params.thetatilt_enabled);
 
 if params.run_parallel ~= 0
     c = parcluster('local'); % build the 'local' cluster object
@@ -95,7 +101,7 @@ if params.N_ISF_steps > max_N_ISF_steps, error('N_ISF_steps is too high'); end
 surface_params
 
 % Calculate the rest of the simulation parameters based on these.
-params = calculate_sim_params(params, A_strct, A_theta_strct, r_conf);
+params = calculate_sim_params(params, A_strct, A_theta_strct, A_tilt_strct,r_conf);
 
 %% Apply In-Phase Scattering Condition
 % If interactions are enabled:

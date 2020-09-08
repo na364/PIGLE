@@ -1,3 +1,4 @@
+
 % Copyright (c) 2018, Nadav Avidor.
 % All rights reserved.
 % This file is part of the PIGLE - Particles Interacting in Generalized Langevin Equation simulator, subject to the 
@@ -59,6 +60,7 @@ if (exist('clearParams','var') && clearParams) || ~exist('clearParams','var')
 end
 
 %% Create the model
+
 create_model
 
 %% Run the model, potentially calculate ISF
@@ -84,7 +86,7 @@ end
 for i=1:length(data.prtcl)
     
     [data.prtcl(i).KE, data.prtcl(i).Rot_KE] = ...
-        calc_kinetic_energy(data.prtcl(i),params.prtcl(i),params.k_B,params.z_enabled,params.theta_enabled);
+        calc_kinetic_energy(data.prtcl(i),params.prtcl(i),params.k_B,params.z_enabled,params.theta_enabled,params.thetatilt_enabled,params.is_Euler);
     
     disp(['mass =' num2str(params.prtcl(i).mass) ' ... T  = ' ...
         num2str(data.prtcl(i).KE) ' , ' num2str(data.prtcl(i).Rot_KE)])

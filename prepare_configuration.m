@@ -34,7 +34,9 @@ form_factor_conf = prsdArgs.Results.form_factor_conf;
 CoM_form_factor_conf = prsdArgs.Results.CoM_form_factor_conf;
 
 Natoms = r_conf.Natoms;
-
+mA=r_conf.diatomic_mass(1);
+mB=r_conf.diatomic_mass(2);
+is_vertical=r_conf.is_vertical;
 %% Create potisions of scattering centers
 switch r_conf.caseNum
     
@@ -48,7 +50,19 @@ switch r_conf.caseNum
         rotAngle(end)=[];
         r_conf = zeros(Natoms,3);
         for i=1:Natoms
-            r_conf(i,1:2) = hlp_f.Rmat(rotAngle(i))*r0*[1 0]';    
+            if Natoms==2
+
+                
+                if is_vertical
+                r_conf(1,3)=-2*r0*mB/(mA+mB);
+                r_conf(2,3)=2*r0*mA/(mA+mB);
+                else
+                r_conf(1,1)=-2*r0*mB/(mA+mB);
+                r_conf(2,1)=2*r0*mA/(mA+mB);
+                end
+            else
+            r_conf(i,1:2) = hlp_f.Rmat(rotAngle(i))*r0*[1 0]';  
+            end
         end
     otherwise
         warning('Configuration was NOT set-up')
