@@ -4,6 +4,7 @@
 % This file is part of the PIGLE - Particles Interacting in Generalized Langevin Equation simulator, subject to the 
 % GNU/GPL-3.0-or-later.
 
+disp('Starting create_model')%added for debugging help
 % to be executed from PIGLE root folder
 close_system('sl_pigle_main_current',0);
 if exist('sl_pigle_main_current.slx','file')
