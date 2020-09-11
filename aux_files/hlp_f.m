@@ -101,7 +101,7 @@ classdef hlp_f
         end
         function m=Rmat3(x,y)
             m1 =[cos(x) sin(x) 0; -sin(x) cos(x) 0; 0 0 1];
-            m2 =[1 0 0; 0 cos(y) -sin(y); 0 sin(y) cos(y)];
+            m2 =[cos(y) 0 sin(y); 0 1 0; -sin(y) 0 cos(y)];
             m=m2*m1;
         end
     end
