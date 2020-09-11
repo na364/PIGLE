@@ -177,7 +177,7 @@ classdef prepFuncs
                     yindex=ceil(mod(params.prtcl(i).r_init(2,:),params.unitcell.celldim(2))/params.unitcell.y(2));
                     for ex1=1:length(xindex)
                         if xindex(ex1)==0
-                            xindex(ex1)=length(parms.unitcell.x);
+                            xindex(ex1)=length(params.unitcell.x);
                             
                         end
                         if yindex(ex1)==0
