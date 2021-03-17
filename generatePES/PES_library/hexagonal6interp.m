@@ -1,9 +1,10 @@
+% Copyright (c) 2020, Nadav Avidor
 % Copyright (c) 2016, John Ellis.
 % All rights reserved.
 % This file is part of the PIGLE - Particles Interacting in Generalized Langevin Equation simulator, subject to the 
 % GNU/GPL-3.0-or-later.
 
-function [V,nx,ny,celldim, X, Y] = hexagonal6interp(celldim, nx, ny, top,frac1, frac2,bridge,hcp,fcc)
+function [V,nx,ny,celldim, X, Y] = hexagonal6interp(celldim, nx, ny, top,frac1, frac2,bridge,hcp,fcc,varargin)
 
 %
 % This programme takes 6 points in the irreducible triangle of a 111
@@ -14,8 +15,18 @@ function [V,nx,ny,celldim, X, Y] = hexagonal6interp(celldim, nx, ny, top,frac1, 
 % the variable frac to calculate the inbetween points. By varying frac you
 % can vary the width of the channel.
 %
-% copper 'a' constant - nearest neighbour distance in 111 plane
-a1=celldim(1);
+
+%% parse varargin
+prsdArgs = inputParser;   % Create instance of inputParser class.
+prsdArgs.addParameter('isVreal', 1, @isnumeric);% V = real(V)
+prsdArgs.addParameter('pwr', 1, @isnumeric);% V = V.^pwr
+prsdArgs.parse(varargin{:});
+            
+pwr = prsdArgs.Results.pwr;
+isVreal = prsdArgs.Results.isVreal;
+            
+%%
+a1=celldim(1); % Assumed to be the hexagonal lattice constant.
 a2=celldim(2);
 %
 % set up the coordinates of the 6 reference points
@@ -68,8 +79,8 @@ G1=4*pi/sqrt(3)/a1;
 % now we need to set up vectors that tell you which
 % G vectors are related to a particular (ia, ib) - store
 % these as the a and b components of the 6 first order G
-% vectors. This is a rather poor manual way of setting them up - Zianding
-% has a much nicer way - but at least this is tranparent and easy to code
+% vectors. This is a rather poor manual way of setting them up -
+% but at least this is tranparent and easy to code
 % First the G vectors are given wrt axes 'a' which rises at 30 deg to
 % the usual x axis and 'b' which is parallel to the usual y axis. The
 % notation is a bit confused - V1Ga means the a coordinate of the potential
@@ -207,6 +218,11 @@ for ix=1:nx
             end
         end
     end
+end
+
+if isVreal
+    V = real(V);
+    V = V.^pwr;
 end
 
 % figure(2)

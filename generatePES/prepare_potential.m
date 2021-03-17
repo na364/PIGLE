@@ -31,6 +31,11 @@ end
 if ~isfield(unitcell,'z')
     unitcell.z=0;
 end
+if ~isfield(pot_strct,'extra_args')
+    pot_strct.extra_args={};
+end
+
+
 
 V_morse = @(De,a,r_e,r) De.*(exp(-2*a*(r-r_e))-2*exp(-a*(r-r_e)));
 %Vcor_f = @(r) Vcor_/(z(end)-r_e)*(r-r_e)-Vcor_; % control decay in corrugation as function of 'z'
@@ -61,7 +66,7 @@ end
 for i=1:length(z)
     for j=1:length(angle)
       tmp = pot_vals(:,i,j)';
-      f_2D_args_(i,j) = {num2cell(tmp)};
+      f_2D_args_(i,j) = {[num2cell(tmp) pot_strct.extra_args]};
     end
 end
 

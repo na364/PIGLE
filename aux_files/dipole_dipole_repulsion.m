@@ -22,7 +22,7 @@ classdef dipole_dipole_repulsion
             %   Inputs:
             %           mu0   [Debye]      - adsorbate dipole moment in the zero coverage limit (could be a fit parameter)
             %           n0    [1/ML/Angstrm^2]       - adsorbate surface density at a coverage of 1 ML, given,
-            %                                in the case of a hexagonal surface, (2/√3)*(1/a2), where a is the surface lattice constant in units of Angstrom;
+            %                                in the case of a hexagonal surface, (2/√3)*(1/a^2), where a is the surface lattice constant in units of Angstrom;
             %           theta [ML]         - adsorbate coverage
             %           alpha [Angstrom^3] - adsorbate polarizability (could be a fit parameter)
             %
