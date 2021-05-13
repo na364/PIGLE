@@ -51,7 +51,7 @@ for i=1:length(pot_strct.V)
      % if there are 2 values for each 'v', assume that its for rotational PES
      if length(v) == 2
          t = [0:pi/n_xyztheta(4):pi-pi/n_xyztheta(4)];
-         v = diff(v)*(cos(t+(v(1)<v(2))*pi/2)).^2+v(1);
+         v = diff(v)*(sin(t)).^2+v(1);
      end
      
      if pot_strct.is_potval(i)
