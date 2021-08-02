@@ -17,7 +17,7 @@ function [data_last, isf_c_CoM,     isf_inc_CoM,     isf_1_CoM,     isf_c,     i
     % Run N simulations and sum the FFTs of the scattering functions.
     [data_last, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_isf(N, params, dK_reshaped);
     
-        % Reshape isf to matrix with dimention (dK,length(isf),num_of_azimuth)
+        % Reshape isf to matrix with dimension (dK,length(isf),num_of_azimuth)
     if size(dK,3) > 1
         isf_c_CoM = permute(reshape(isf_c_CoM,[],2,size(isf_c_CoM,2)),[1 3 2]);
         isf_inc_CoM = permute(reshape(isf_inc_CoM,[],2,size(isf_inc_CoM,2)),[1 3 2]);
@@ -166,15 +166,16 @@ for j=1:length(data.prtcl)
     FF_CoM = reshape(FF_CoM,[],1);    
     
     for i=1:size(r,2)
+        % loop over all the particles in one species.
         r_i = squeeze(r(1:(2 + (z_enabled > 0 && dKz_include_in_isf)),i,:));
         A_i = FF_CoM .* exp(1i * (delta_k * r_i));
         A_c_CoM = A_c_CoM + A_i;
-        Skw_1_CoM = conj(fft(A_i,[],2)).*fft(A_i,[],2);
+        Skw_1_CoM = conj(fft(A_i,[],2)).*fft(A_i,[],2)/size(A_i,2);
         Skw_inc_CoM = Skw_inc_CoM + Skw_1_CoM;
     end
 end
 
-Skw_c_CoM = conj(fft(A_c_CoM,[],2)).*fft(A_c_CoM,[],2);
+Skw_c_CoM = conj(fft(A_c_CoM,[],2)).*fft(A_c_CoM,[],2)/size(A_c_CoM,2);
 
 % Skw_inc_CoM = real(Skw_inc_CoM);
 % Skw_c_CoM = real(Skw_c_CoM);
@@ -215,12 +216,12 @@ else
             r_i = squeeze(r1(1:(2 + (z_enabled > 0 && dKz_include_in_isf)),i,:));
             A_i = FF(:,i) .* exp(1i * (delta_k * r_i));
             A_c = A_c + A_i;
-            Skw_1 = conj(fft(A_i,[],2)).*fft(A_i,[],2);
+            Skw_1 = conj(fft(A_i,[],2)).*fft(A_i,[],2)/size(A_i,2);
             Skw_inc = Skw_inc + Skw_1;
         end
     end
 
-    Skw_c = conj(fft(A_c,[],2)).*fft(A_c,[],2);
+    Skw_c = conj(fft(A_c,[],2)).*fft(A_c,[],2)/size(A_c,2);
 
     % Skw_inc = real(Skw_inc);
     % Skw_c = real(Skw_c);
