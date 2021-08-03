@@ -210,11 +210,12 @@ else
 
     A_c = zeros(size(delta_k,1),size(data.prtcl(1).r,3));
     Skw_inc = A_c;
-
+    NumScat=0;
     for j=1:length(data.prtcl)
         r = data.prtcl(j).r;
         r_conf = data.prtcl(j).conf.r_conf;
         r1 = hlp_f.calc_new_r(r,r_conf,z_enabled,theta_enabled);
+        NumScat=NumScat+size(r1,2);
         
         % Prep FF for the calculation.
         % TODO check if it works for Natoms>1 etc.
