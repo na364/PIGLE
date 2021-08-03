@@ -17,7 +17,7 @@ function [data_last, isf_c_CoM,     isf_inc_CoM,     isf_1_CoM,     isf_c,     i
     % Run N simulations and sum the FFTs of the scattering functions.
     [data_last, isf_c_CoM ,isf_inc_CoM ,isf_1_CoM , isf_c,isf_inc,isf_1] = sum_isf(N, params, dK_reshaped);
     
-        % Reshape isf to matrix with dimention (dK,length(isf),num_of_azimuth)
+        % Reshape isf to matrix with dimension (dK,length(isf),num_of_azimuth)
     if size(dK,3) > 1
         isf_c_CoM = permute(reshape(isf_c_CoM,[],2,size(isf_c_CoM,2)),[1 3 2]);
         isf_inc_CoM = permute(reshape(isf_inc_CoM,[],2,size(isf_inc_CoM,2)),[1 3 2]);
@@ -158,23 +158,37 @@ elseif size(delta_k,2) == 3
     error('delta_k is 3D, but z dimension is disabled')
 end    
 
+NumScat=0;
+% the number of scattering centres.
+
 for j=1:length(data.prtcl)
-    r = data.prtcl(j).r;    
+    r = data.prtcl(j).r;
     FF_CoM = data.prtcl(j).conf.form_factor.FF_CoM;
     
     % Reshape F_CoM to a vector compatible with the reshaped dK
     FF_CoM = reshape(FF_CoM,[],1);    
-    
+    NumScat=NumScat+size(r,2);
     for i=1:size(r,2)
+        % loop over all the particles in one species.
         r_i = squeeze(r(1:(2 + (z_enabled > 0 && dKz_include_in_isf)),i,:));
         A_i = FF_CoM .* exp(1i * (delta_k * r_i));
         A_c_CoM = A_c_CoM + A_i;
-        Skw_1_CoM = conj(fft(A_i,[],2)).*fft(A_i,[],2);
+        Skw_1_CoM = conj(fft(A_i,[],2)).*fft(A_i,[],2)/size(A_i,2);
+        % devide by the number of time steps to compensate for the difference 
+        % between discrete Fourier transform and continuous Fourier transform.
+        % The devision is done once instead of twice, because when calculating
+        % the ISFs, the ifft function, by the definition of MATLAB, will have such a devision.
+        % The correction is done in the same way when calculating
+        % Skw_c_CoM, Skw_1, and Skw_c.
         Skw_inc_CoM = Skw_inc_CoM + Skw_1_CoM;
     end
 end
 
-Skw_c_CoM = conj(fft(A_c_CoM,[],2)).*fft(A_c_CoM,[],2);
+Skw_c_CoM = conj(fft(A_c_CoM,[],2)).*fft(A_c_CoM,[],2)/size(A_c_CoM,2);
+
+Skw_inc_CoM=Skw_inc_CoM/NumScat;
+Skw_c_CoM=Skw_c_CoM/NumScat;
+% devide by the number of scattering centres.
 
 % Skw_inc_CoM = real(Skw_inc_CoM);
 % Skw_c_CoM = real(Skw_c_CoM);
@@ -215,13 +229,16 @@ else
             r_i = squeeze(r1(1:(2 + (z_enabled > 0 && dKz_include_in_isf)),i,:));
             A_i = FF(:,i) .* exp(1i * (delta_k * r_i));
             A_c = A_c + A_i;
-            Skw_1 = conj(fft(A_i,[],2)).*fft(A_i,[],2);
+            Skw_1 = conj(fft(A_i,[],2)).*fft(A_i,[],2)/size(A_i,2);
             Skw_inc = Skw_inc + Skw_1;
         end
     end
 
-    Skw_c = conj(fft(A_c,[],2)).*fft(A_c,[],2);
-
+    Skw_c = conj(fft(A_c,[],2)).*fft(A_c,[],2)/size(A_c,2);
+    
+    Skw_inc=Skw_inc/NumScat;
+    Skw_c=Skw_c/NumScat;
+    
     % Skw_inc = real(Skw_inc);
     % Skw_c = real(Skw_c);
     % Skw_1 = real(Skw_1);
